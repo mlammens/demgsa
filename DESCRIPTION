@@ -1,8 +1,10 @@
 Package: demgsa
-Title: What the package does (short line)
+Title: Carryout Global Sensitivity Analyses Of Demographic Matrix Models
 Version: 0.1
-Authors@R: "First Last <first.last@example.com> [aut, cre]"
+Data: 2014-12-21
+Authors@R: "Matthew E. Aiello-Lammens <matt.lammens@gmail.com> [aut, cre]"
 Description: What the package does (paragraph)
-Depends: R (>= 3.0.2)
-License: What license is it under?
-LazyData: true
+Depends:
+    R (>= 3.0.2)
+License: NA
+LazyData: NA
