@@ -10,8 +10,8 @@
 #'
 #' @return `mp.read` returns a nested list object. The first level includes
 #' two elements, the version of the *.MP file and list names "mp.file". The
-#' "mp.file" list is composed of 52 elements that provide all of the information
-#' found in the *.MP file.
+#' "mp.file" list is composed of 53 elements that provide all of the information
+#' found in the *.MP file and a list of all of the results from the *.MP file.
 #'
 #' @details
 #' mp.file 'list' structure elements. Most element names from RAMAS Metapop source code
