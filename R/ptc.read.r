@@ -1,25 +1,37 @@
+#' @export ptc.read
+#' @title Read RAMAS GIS Patch (PTC) file
+#' @description
+#' \code{ptc.read} reads data from a *.ptc file, used in RAMAS GIS -
+#' Spatial Data module. This file contains information on the spatial
+#' structure of the metapopulation.
+#'
+#' @param ptcFile The name of the *.ptc file to read
+#'
+#' @return \code{ptc.read} returns a list object containing all information
+#' from the *.ptc file.
+
 ptc.read <- function( ptcFile ) {
   ########################################################################################
-  ## Read data from a *.ptc file, used in RAMAS GIS - 
+  ## Read data from a *.ptc file, used in RAMAS GIS -
   ## Spatial Data module
   ##
   ## Args:
   ##  ptcFile: The path and name of a *.ptc file to be read.
   ##
   ########################################################################################
-  
+
   # Print the name of the ptc file to the console
   print( paste( "Begin ptc.read function with file: ", ptcFile ) )
   # Read the *.ptc file in as a long unsorted 'list' structure
   Ptc <- readLines( ptcFile )
-  # Clear first line of "map=\xff". This step is necessary to avoid errors when using 
+  # Clear first line of "map=\xff". This step is necessary to avoid errors when using
   # regex functions in this script
   Ptc[1] <- sub("(map=).*","\\1",Ptc[1])
 
   # Set values that will be used through out the function
   MigrationLine <- which(Ptc == "Migration")
   CorrLine <- which(Ptc == "Correlation")
-  
+
   # Check if Results are present.  If yes, set ResLine and LandLine variables
   if ( any(grepl( "^Results", Ptc )) ) {
     print( paste("ptc.read: Results present in *.ptc file: ", ptcFile) )
@@ -31,12 +43,12 @@ ptc.read <- function( ptcFile ) {
 
   # Create an empty 'list' structure to store ptc file information
   Ptc.list <- vector("list",length=0)
-  
-  ## As of RAMAS GIS 5.1, the first 28 lines of the *.ptc file are fixed.  The current 
+
+  ## As of RAMAS GIS 5.1, the first 28 lines of the *.ptc file are fixed.  The current
   ## version of this program assumes that within these first 28 lines to location (i.e.
   ## line number) of some information is fixed.
   #
-  # Landscape input file version: Check that file is a 'Landscape' file and, if yes, get 
+  # Landscape input file version: Check that file is a 'Landscape' file and, if yes, get
   # first two numbers in string that are separated by a period using regexs
   if ( grepl("^Landscape", Ptc[1]) ) {
     Ptc.list$version <- sub(".*([0-9]).([0-9]).*","\\1\\2",Ptc[1])
@@ -51,7 +63,7 @@ ptc.read <- function( ptcFile ) {
   Ptc.list$cell.length <- as.numeric( Ptc[7] )
   # Habitat Suitability Function
   Ptc.list$HSI.func <- Ptc[8]
-  
+
   ## Habitat Relationships (HSI) section
   # Habitat suitability threshold for patches
   Ptc.list$HSI.Threshold <- as.numeric( Ptc[10] )
@@ -63,7 +75,7 @@ ptc.read <- function( ptcFile ) {
   Ptc.list$HSI.IsPatchMap <- as.logical( color.pmap[2] )
   # Number of decimals to export in habitat suitability map
   Ptc.list$HSI.ExportDecN <- as.numeric( Ptc[13] )
-  
+
   ## Link to Metapopulation (MP) section
   # Carrying Capacity (K) function
   Ptc.list$MP.K.func <- Ptc[14]
@@ -91,7 +103,7 @@ ptc.read <- function( ptcFile ) {
   Ptc.list$MP.FrictionMapFilename <- Ptc[26]
   # Distance calculation (Edge to Edge, Center to Edge, or Center to Center)
   Ptc.list$MP.DistCalc <- Ptc[27]
-  
+
   ## Input Maps Information
   # Number of input maps
   Ptc.list$MapN <- as.numeric(Ptc[28])
@@ -113,17 +125,17 @@ ptc.read <- function( ptcFile ) {
       MapData$ColN <- as.numeric( MapLines[ 5 + LineReadOffset ] )
       # Add new MapData list to AllMapDataList
       AllMapData[[ map ]] <- MapData
-    }    
+    }
   } else {
     print( 'No maps included in this *.ptc file.')
   }
   Ptc.list$MapData <- AllMapData
-  
+
   ## Default Population Information
   # Note default population information, assuming it is the line immediately preceding
   # the MigrationLine.
   Ptc.list$DefaultPop <- Ptc[ MigrationLine - 1 ]
-  
+
   ## Migration (Dispersal) and Correlation Distance Functions
   # UseDispDistFunc: True if dispersal rates are based on dispersal distance function; false if
   # they are specified in the dispersal matrix. NOTE: For *.ptc files, this value should
@@ -136,30 +148,30 @@ ptc.read <- function( ptcFile ) {
   Ptc.list$UseCorrDistFunc <- as.logical( Ptc[CorrLine +1] )
   # CorrDistFunc: Correlation-distance function parameters - a, b, c - Cij = a exp(-Dij^c/b)
   Ptc.list$CorrDistFunc <- as.numeric(unlist(strsplit( Ptc[CorrLine + 2],',' )))
-  
+
   ##------------------------------------------------------------------------------------##
   ## Below are data associated with the Results section of a *.ptc file, and while only
   ## be present in those *.ptc files that have been run.  This section includes information
   ## on the HSI Histogram, which is actually noted prior to the Results line.
-  
-  if ( any(grepl( "^Results", Ptc )) ) {  
-    
+
+  if ( any(grepl( "^Results", Ptc )) ) {
+
     ## HSI Histogram Information:
     # Determine the HSI map line
     hsi.map.line <- grep("^HSI map",Ptc)
     ### FUTURE DEV - Make this information useful in R
     Ptc.list$HSI.Histogram <- Ptc[ (hsi.map.line+1):(ResLine-2) ]
     Ptc.list$HSI.MapInfo <- Ptc[ (ResLine-1) ]
-    
+
     # Results Date Information
     Ptc.list$ResultsDate <- Ptc[ ResLine ]
-    
+
     # Number of populations
     PopLine <- unlist( strsplit( Ptc[ ResLine + 1 ]," " ) )
     Ptc.list$PopN <- as.numeric(PopLine[1])
-    
-    ## Population Information: This section is similar to the format employed in 
-    ## RAMAS Version 5.0.  
+
+    ## Population Information: This section is similar to the format employed in
+    ## RAMAS Version 5.0.
     # Define Population Data Row Names
     PopData_df_colnames <- c("name","X_coord","Y_coord","InitAbund","DensDep","MaxR","K","Ksdstr","Allee","KchangeSt","DD_Migr","Cat1.Multiplier","Cat1.Prob","IncludeInSum","StageMatType","RelFec","RelSur","localthr","Cat2.Multiplier","Cat2.Prob","SDMatType","TargetPopK","Cat1.TimeSinceLast","Cat2.TimeSinceLast","RelDisp")
     # Read Population Data as data.frame
@@ -170,7 +182,7 @@ ptc.read <- function( ptcFile ) {
     # Assign columns names
     names(PopData_df) <- PopData_df_colnames
     Ptc.list$PopData_df <- PopData_df
-    
+
     ## Population Patch Characteristics
     ## Total Habitat Suitability (HSI), Patch Area (#Cells), pminX, pminY, pmaxX, pmaxY,
     ## Population (patch) ID
@@ -179,15 +191,15 @@ ptc.read <- function( ptcFile ) {
     PopPatchChar_df <- read.table( ptcFile, header=FALSE, skip = (ResLine+Ptc.list$PopN+3), nrows=Ptc.list$PopN )
     names(PopPatchChar_df) <- PopPatchChar_df_colnames
     Ptc.list$PopPatchChar_df <- PopPatchChar_df
-    
+
     ## Summary Line
     ## Not sure what to do with this line yet.  It includes the following values:
     ## Cell length; Max Dispersal Distance; Max Patch Area; Unidentified 1; Unidentified 2
     Ptc.list$SummaryLine <- Ptc[ ResLine + (2*Ptc.list$PopN) + 4 ]
-    
+
     ## Distance Matrix
-    ## If center-to-center or edge-to-edge distance is selected, then the matrix in the 
-    ## *.ptc file is a lower triangular matrix, and reading it in is more complicated 
+    ## If center-to-center or edge-to-edge distance is selected, then the matrix in the
+    ## *.ptc file is a lower triangular matrix, and reading it in is more complicated
     ## than simply reading in a square matrix.
     # If matrix is square (i.e. "Center to edge")
     if ( Ptc.list$MP.DistCalc == "Center to edge" ) {
@@ -202,14 +214,14 @@ ptc.read <- function( ptcFile ) {
       DistMatr <- DistMatr + t(DistMatr)
       Ptc.list$DistMatr <- DistMatr
     }
-    
+
     ## Landscape Indices - Populations
     ## Five indices for each population (patch):
     ## Perimeter, Shape Index, Fractal Dim., Core Area, Edge-to-Area Ratio
     # PopLandInd Row Names
     PopLandInd_df_colnames <- c("perimeter","shp.index","fractal.dim","core.area","edge.area.ratio")
     Ptc.list$PopLandInd_df <- read.table( ptcFile, header=FALSE, skip = LandLine, nrows=Ptc.list$PopN, col.names=PopLandInd_df_colnames )
-    
+
     ## Landscape Indices - Summary
     ## Summary values of the Landscape Indices for each population
     LandIndSummary_colnames <- c("tot.edge","tot.core","avg.shp","avg.fractal","avg.perimeter")
@@ -219,8 +231,8 @@ ptc.read <- function( ptcFile ) {
     ## This information is simply being stored as an unsorted list for the time being.
     MapAvgLine <- grep("Map averages",Ptc)
     Ptc.list$MapAvg <- Ptc[ (MapAvgLine+1):(MapAvgLine+Ptc.list$MapN) ]
-    
+
   }
-  
+
   return(Ptc.list)
 } # End ptc.read function

@@ -7,7 +7,7 @@
 #'
 #' @param mpFile The name of the *.MP file to be read.
 #'
-#' @return `mp.read` returns a nested list object. The first level includes
+#' @return \code{mp.read} returns a nested list object. The first level includes
 #' two elements, the version of the *.MP file and list names "mp.file". The
 #' "mp.file" list is composed of 52 elements that provide all of the information
 #' found in the *.MP file.
