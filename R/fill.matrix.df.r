@@ -1,3 +1,20 @@
+#' @export fill.matrix.df
+#' @title Create dispersal or correlation matrix for RAMAS GIS model
+#'
+#' @description
+#' Creates a Dispersal or Correlation Matrix based on the
+#' dispersal-(correlation-)distance function
+#'
+#' @param PopDF Population information from the mp.file structure. Specifically
+#' the information in the mp.file$PopList element
+#' @param Func Dispersal- or correlation-distance function parameters. Element
+#' mp.file$DispDistFunc or mp.file$CorrDistFunc in the mp.file 'list' structure
+#' @param Type Either "disp" or "corr" designating the type of matrix to create
+#'
+#' @return
+#' Either a dispersal (\code{DispMatr}) or correaltion (\code{CorrMatr}) matrix,
+#' depending on \code{Type} setting
+#'
 fill.matrix.df <- function(PopDF, Func, Type) {
 	# Creates a Dispersal or Correlation Matrix based on the dispersal-(correlation-)distance function
 	#
