@@ -1,0 +1,244 @@
+Running Sensitivity Analysis Scripts
+========================================================
+Author: Matthew Aiello-Lammens
+Date: 23 January 2013
+
+# Purpose of the Sensitivity Analysis Scripts
+
+The scripts and implementation outlined here are meant to be used to 
+create random sets of input parameters for a Metapop simulation. By examining
+the uncertainty of the input parameters and the variability of various 
+end-point metrics (Quasi-extinction measures and Expected Minimum Abundance values)
+we can assess relative importance of uncertainty in our input parameter values.
+
+# Parameters Allowed to Vary in the Current Implementation
+
+The following parameters are allowed to vary in the current implementation
+of the sensitivity analysis scripts.
+
+* Each element of the stage/age matrix (i.e. survival and fecundity)
+* Each element of the stage/age standard deviation matrix 
+(i.e. variability in survival and fecundity)
+* Dispersal Rates
+  * Each element of the dispersal-distance function (all varied using **One** random variable)
+  * Each element of the dispersal matrix, either each independently or all dependently (user determined)
+  * Discretely between DCH scenarios (includes discrete selection of Dispersal Matrix as well)
+* Inter-population Correlation
+  * Each element of the correlation-distance function (all varied using **One** random variable)
+  * Each element of the correlation matrix (all varied using **One** random variable)
+* Stage Initial Abundance Distribution Values
+  * User can select use of Stable Age Distribution, as determined by the matrix elements
+  * User can allow stage initial abundance distribution values to vary - actual initial abundance 
+  values are varied else where in the script
+* Population Initial Abundance - All populations varied using **One** random value
+* Population specific Rmax - All populations varied using **One** random value
+* Population Carrying Capacity
+  * KCH files chosen discretely between scenarios using **One** random value
+  * WARNING / TODO: Currently carrying capacity is not varied in any other manner
+
+# Initial Set-up
+
+## Acquire Sensitivity Analysis R Scripts and Install Necessary Packages
+
+Currently the SA scripts are managed and distributed by M Aiello-Lammens.
+To get these scripts either he, or one of the other group members, must *share*
+the `SA-Code` DropBox folder with you. In this folder there are eleven *.r files,
+one *.Rdata file, and one `sens.config.txt` template file.
+
+R Files:
+
+* sensitivity.setup.r
+* mp.read.r
+* mp.read.results.r
+* mp.write.r
+* ptc.read.r
+* hdhist.read.r
+* fill.matrix.df.r
+* metapopversion.r
+* sensitivity.r
+* mp.results.r
+* mp.mult.results.r
+* mp.guide.Rdata
+
+There are two *non-base* packages required for the sensitivity analysis
+scripts:
+
+1. fields
+2. lhs
+
+Install these two packages by executing the following commands
+at the R terminal:
+
+```
+install.packages('fields',dependencies=TRUE)
+install.packages('lhs',dependencies=TRUE)
+```
+
+## Setup SA Scripts
+
+Once you have the `SA-Code` folder and installed the required packages
+you have to "setup" the R scripts.  This will all be done at the R prompt
+and requires **'sourceing'** the `sensitivity.setup.r` script, then executing
+the function `sensitivity.setup( [path to SA folder] )`.
+
+```{r sa_setup}
+# Define location of SA folder (not necessary, but good practice)
+sa.folder <- '/Users/mlammens/Dropbox/Scripts-Programs/SA-Code/'
+# 'source' the setup file
+source( paste( sa.folder, 'sensitivity.setup.r', sep="" ))
+# Execute setup function
+sensitivity.setup( sa.folder )
+```
+
+## SA Functions
+
+If you successfully carried out the above steps, then you now 
+have several functions in your work space.  While a simple sensitivity
+analysis will utilize one of these functions (`sensitivity`), these functions
+can also be used on their own to do things like:
+
+* Determine which Metapop version was used for a particular *.mp file
+* Read a *.mp file and store it's contents in a list structure
+* Read a *.ptc file
+* Write a new *.mp file, in the even that you adjusted a file you read in
+
+# Running a Sensitivity Analysis
+
+## Metapop File Preparation
+
+To create new *.mp files, the user supplies at least two *.mp files, 
+one of which has all of the lowest estimates for any uncertain parameters 
+and the other which has all of the highest estimates for any uncertain 
+parameters.  Note that this is different than  ‘best case’ and ‘worst case’ 
+scenario *.mp files.  Some high values for parameters may be 
+associated with a ‘worst case’ scenario (e.g., correlation 
+structure among populations), which would include low values of 
+other parameters (e.g., survival or fecundity).
+
+### Special cases for varying Carrying Capacity and Migration (Dispersal) scenarios
+
+More than two *.mp files can be used in the SA implemented in these
+scripts to test uncertainty in changes through time of carrying capacity 
+or dispersal parameters. In RAMAS Metapop, these changes are implemented 
+via change files, or *.?CH files.  For example, in the Snow Plover 
+example included in the example data set, we incorporated changes to 
+population carrying capacity resulting from forecasted sea-level rise, 
+using RAMAS GIS to create a spatially dynamic demographic model in which 
+population carrying capacity decreases over the course of the simulation. 
+The population carrying capacities for each patch is stored in *.KCH 
+files (one per patch). We generated three
+carrying capacity change scenarios (Low, Medium, and High carrying capacities). 
+In carrying out a sensitivity analysis, we choose one of these 
+three scenarios at random to accompany the other randomly 
+chosen parameter values.  A similar method is implemented to vary 
+Migration (Dispersal) scenarios, which change through time in a 
+dynamic spatial model as well, while populations change in size 
+and distance from each other, or shift in space. 
+
+## sens.config.txt file
+
+This is a template file that can be copied and modified to setup
+the configurations of individual sensitivity runs.  Step through this 
+file and read all of the material in it.  
+
+## Simple Snowy Plover Example
+
+Associated Files in `Examples` folder:
+
+* SNPL_HI.mp
+* SNPL_LO.mp
+* sens.config.snpl.simple.txt
+
+What makes this example simple?
+
+* No *.DCH files
+* No *.KCH files
+* Only one species
+
+### Example sens.config file
+
+Look at the `sens.config.snpl.simple.txt` file in
+the `Example` folder. Notice how this file includes full paths. Also 
+notice what the values for `pop.disp.dch.include` and `pop.kch.include` 
+are.
+
+### Run this example
+
+```{}
+# Define location of SA folder (not necessary, but good practice)
+sa.folder <- '/Users/mlammens/Dropbox/Scripts-Programs/SA-Code/'
+# 'source' the setup file
+source( paste( sa.folder, 'sensitivity.setup.r', sep="" ))
+# Execute setup function
+sensitivity.setup( sa.folder )
+
+# Run sensitivity analysis
+config.file <- paste(sa.folder,'Examples/sens.config.snpl.simple.txt',sep="")
+sensitivity(config.file)
+```
+
+## Slightly more complicated Snowy Plover Example - SLR
+
+This example requires that we account for changes in carrying capacity
+through time (*.KCH - see above).  Here are some key differences between 
+this run and the 'simple' example above:
+
+* We have two sets of *.mp files, one associated with no sea-level rise (SLR) and
+the other associated with 2M of SLR
+* Here we have **three** \*.mp files, to allow for three KCH scenarios
+*within* each SLR treatment
+
+### How do we adjust the sens.config file?
+
+* We will need two different sens.config files
+* Add three *.mp files
+* Set `pop.kch.include = TRUE`
+* To compare 2M and No SLR, set `use.rv.file = TRUE` for the 
+**second** analysis (let's do No SLR first, then 2M)
+
+# Even more complicated cases
+
+Look at code for SNPL 
+
+# Extracting information from *.mp files
+
+The process entails using the following scripts:
+* mp.read.results.r
+* mp.results.r
+* mp.mult.results.r
+
+Go through example of doing this.
+
+## mp.mult.results.r 
+
+Needs a text file of all of the *.mp files you want to extract
+information from.  
+
+# Modifying the SA Scripts
+
+### Why?
+
+* Account for parameters not currently varied
+  * User defined Density Dependence values
+  * Other values in the 'Population Specific' parameters
+  * Management actions
+* Incorporate a user defined randomization method (i.e. something other than
+urand or LHS)
+* There are many reasons you may want to vary the code that I can't think of
+
+### Note
+
+The most likely scripts that will need to be modified are those pertaining 
+to results extraction. There are several different versions of the `mp.mult.results.r`
+script floating around the Akcakaya lab right now! 
+(i.e. one for NASA, one for SNPL, etc.)
+
+### Fork (or Copy)
+
+* Always keep a **working** copy of the SA scripts
+* When planning to make changes to the SA code, make a copy of the directory
+in a new location and work on that copy
+* If the change is something to add to the main scripts, merge them later after
+testing
+
+
