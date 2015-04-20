@@ -1,0 +1,76 @@
+# Sensitivity Analysis Configuration File
+# Purpose: This file contains the input arguments required to run the sensitivity analysis
+# scripts.
+mp.file.names = SNPL_LO.mp, SNPL_HI.mp
+# A comma seperated list of *.mp files used in the sensitivity analysis.  The first element of the list
+# MUST be an *.mp file that contains all of the low estimates of parameter values and the last element 
+# of the list MUST be an *.mp file that conatins all of the high estimates of parameter values.
+#
+surv.fec.corr = 0, 0, 0
+# A matrix defining the inter-dependence structutre among and within fecundity and 
+# survival parameters; E.g.,  1, 1, 0 where 1 is completely dependent and 0 is completely 
+# independent.
+#
+# For Survival and Fecundity there are 6 different possible inter-dependence structures:
+# Surv	Fec		SxF		# RandUnif	corrMat 
+# corr	corr	corr	1			1, 1, 1
+# uncor	uncor	corr	stages		0, 0, 1
+# corr	corr	uncorr	2			1, 1, 0
+# cor	uncor	uncor	1+stages	1, 0, 0
+# uncor	cor		uncor	1+stages	0, 1, 0
+# uncor	uncor	uncor	2*stages	0, 0, 0
+#
+sens.iter = 10
+# Desired number of iterations of the sensitibity analysis - this program
+# will produce sens.iter number of new *.mp files
+#
+out.dir = snpl_out
+# The base directory for where the new *.mp files should go
+#	
+out.name = snpl
+# The base name for the new *.mp files
+#
+batch.file = snpl_batch
+# Base name for newly created batch file(s)
+#	
+bat.file.cnt = 1
+# The number of batch files to be created.  Using this feature allows the user
+# to create multiple batch files, which when executed, will run on multiple processors if available
+#
+rand.samp = lhs
+# Sampling scheme for random variables. Options are 'lhs', 'urand', or 'custom'.
+# 'lhs' = latin-hypercube sampling
+# 'urand' = uniform random variable sampling
+# 'custom' = user defined sampling scheme - requires user to write sampling method into
+# directly into 'sensitivity.r' source code.
+#
+rv.file = snpl_rv.csv
+# Name of the file in which either random variables will be saved to or from which random
+# variables will be taken from
+#	
+use.rv.file = FALSE
+# TRUE/FALSE Use random variables from rv.file, rather than writing to the rv.file
+#	
+use.sad = TRUE
+# TRUE/FALSE Use stable age (stage) distribution when calculated the stage initial abundance values
+#
+pop.disp.depend = 0
+# Population disperal uncertainty inter-dependence - this is a value of 0 or 1, 0 indicating that
+# uncertainty in population dispersal is completely independent (i.e., every dispersal value in a 
+# dispersal matrix will be varied with a unique random variable) and 1 indicating that uncertainty in
+# population dispersal is completely dependent (i.e., a single random value will be used to vary every
+# element of the dispersal matrix).
+#
+pop.disp.dch.include = TRUE
+# Include DCH files when dealing with population dispersal parameters.  This is an important option
+# when dealing with population dispersal that may change through time.  If this option is selected
+# then pop.disp.depend is ignored, because only one rv value is used to randomly select between 
+# potential dispersal scenarios. If this option is selected, then rather than varying dispersal values,
+# a dispersal scenario is selected randomly from one of the *.mp files in the mp.file.names list and applied
+# to the new *.mp file.
+#
+pop.kch.include = TRUE
+# Include kch files when dealing with population carrying capacity parameters.  This is an important option
+# when dealing with population K that may change through time.  If TRUE, then a set of *KCH files
+# associated with one of the mp.files will be selected randomly.
+
