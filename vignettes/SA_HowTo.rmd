@@ -1,36 +1,59 @@
-Running Sensitivity Analysis Scripts
+Global Sensitivity Analysis of Demographic Models using demgsa
 ========================================================
 Author: Matthew Aiello-Lammens
-Date: 23 January 2013
+Date: 2015-04-21
 
-# Purpose of the Sensitivity Analysis Scripts
+# Overview
 
-The scripts and implementation outlined here are meant to be used to 
-create random sets of input parameters for a Metapop simulation. By examining
-the uncertainty of the input parameters and the variability of various 
-end-point metrics (Quasi-extinction measures and Expected Minimum Abundance values)
-we can assess relative importance of uncertainty in our input parameter values.
+This tutorial goes through how to use the `demgsa` package to perform a global
+sensitivity analysis (GSA) of a demographic model constructed using the 
+[RAMAS GIS](http://ramas.com/software.htm) Software. `demgsa` includes 
+functions to make easier each major step of a GSA:
 
-# Parameters Allowed to Vary in the Current Implementation
+1. Creation of new demographic models parameterized with random sets of values,
+which represent the uncertainty and/or stochasticity inherent in each parameter.
+2. Creation of scripts to batch run RAMAS GIS models.
+3. Reading and collating of model inputs and results for further analysis.
+
+Using these results, we can examining the uncertainty of the input parameters 
+and the variability of various end-point metrics (e.g., Quasi-extinction 
+measures and Expected Minimum Abundance values), and assess the relative 
+importance of this uncertainty.
+
+In addition, in this tutorial, we demonstrate how to use paired simulations to
+carry out impact assessments. Using this method it is possible to evaluate the
+affect of environmental impacts (e.g., global climate change) or changes to 
+model structure (e.g., changes to density dependence assumptions) on model
+outcomes.
+
+## Parameters Allowed to Vary in the Current Implementation
 
 The following parameters are allowed to vary in the current implementation
-of the sensitivity analysis scripts.
+of `demgsa`.
 
 * Each element of the stage/age matrix (i.e. survival and fecundity)
 * Each element of the stage/age standard deviation matrix 
 (i.e. variability in survival and fecundity)
 * Dispersal Rates
-  * Each element of the dispersal-distance function (all varied using **One** random variable)
-  * Each element of the dispersal matrix, either each independently or all dependently (user determined)
-  * Discretely between DCH scenarios (includes discrete selection of Dispersal Matrix as well)
+  * Each element of the dispersal-distance function (all varied using **One** 
+  random variable)
+  * Each element of the dispersal matrix, either each independently or all 
+  dependently (user determined)
+  * Discretely between DCH scenarios (includes discrete selection of Dispersal 
+  Matrix as well)
 * Inter-population Correlation
-  * Each element of the correlation-distance function (all varied using **One** random variable)
-  * Each element of the correlation matrix (all varied using **One** random variable)
+  * Each element of the correlation-distance function (all varied using **One** 
+  random variable)
+  * Each element of the correlation matrix (all varied using **One** random 
+  variable)
 * Stage Initial Abundance Distribution Values
-  * User can select use of Stable Age Distribution, as determined by the matrix elements
-  * User can allow stage initial abundance distribution values to vary - actual initial abundance 
+  * User can select use of Stable Age Distribution, as determined by the matrix 
+  elements
+  * User can allow stage initial abundance distribution values to vary - actual 
+  initial abundance 
   values are varied else where in the script
-* Population Initial Abundance - All populations varied using **One** random value
+* Population Initial Abundance - All populations varied using **One** random 
+value
 * Population specific Rmax - All populations varied using **One** random value
 * Population Carrying Capacity
   * KCH files chosen discretely between scenarios using **One** random value
@@ -38,40 +61,29 @@ of the sensitivity analysis scripts.
 
 # Initial Set-up
 
-## Acquire Sensitivity Analysis R Scripts and Install Necessary Packages
+## Install the `demgsa` package
 
-Currently the SA scripts are managed and distributed by M Aiello-Lammens.
-To get these scripts either he, or one of the other group members, must *share*
-the `SA-Code` DropBox folder with you. In this folder there are eleven *.r files,
-one *.Rdata file, and one `sens.config.txt` template file.
+Currently the `demgsa` package is available via [github](https://github.com/). 
+The easiest way to install this package is to use the 
+[devtools](https://github.com/hadley/devtools) package.
 
-R Files:
 
-* sensitivity.setup.r
-* mp.read.r
-* mp.read.results.r
-* mp.write.r
-* ptc.read.r
-* hdhist.read.r
-* fill.matrix.df.r
-* metapopversion.r
-* sensitivity.r
-* mp.results.r
-* mp.mult.results.r
-* mp.guide.Rdata
+```{r}
+## Check for devtools. Install if not already installed.
+if( !( "devtools" %in% installed.packages() ) ){
+  install.packages( "devtools" ) 
+}
 
-There are two *non-base* packages required for the sensitivity analysis
-scripts:
+## Load devtools package
+library( devtools )
 
-1. fields
-2. lhs
+## Check for demgsa. Install if not already installed
+if( !( "demgsa" %in% installed.packages() ) ){
+  devtools::install_github( "mlammens/demgsa" ) 
+}
 
-Install these two packages by executing the following commands
-at the R terminal:
-
-```
-install.packages('fields',dependencies=TRUE)
-install.packages('lhs',dependencies=TRUE)
+## Load demgsa package
+library( demgsa )
 ```
 
 ## Setup SA Scripts
