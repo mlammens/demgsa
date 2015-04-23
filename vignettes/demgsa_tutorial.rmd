@@ -26,7 +26,7 @@ affect of environmental impacts (e.g., global climate change) or changes to
 model structure (e.g., changes to density dependence assumptions) on model
 outcomes.
 
-## Parameters Allowed to Vary in the Current Implementation
+## Parameters allowed to vary in version 0.1.0 of demgsa
 
 The following parameters are allowed to vary in the current implementation
 of `demgsa`.
@@ -59,7 +59,7 @@ value
   * KCH files chosen discretely between scenarios using **One** random value
   * WARNING / TODO: Currently carrying capacity is not varied in any other manner
 
-# Initial Set-up
+# Initial set-up
 
 ## Install the `demgsa` package
 
@@ -86,27 +86,12 @@ if( !( "demgsa" %in% installed.packages() ) ){
 library( demgsa )
 ```
 
-## Setup SA Scripts
+## demgsa Functions
 
-Once you have the `SA-Code` folder and installed the required packages
-you have to "setup" the R scripts.  This will all be done at the R prompt
-and requires **'sourceing'** the `sensitivity.setup.r` script, then executing
-the function `sensitivity.setup( [path to SA folder] )`.
-
-```{r sa_setup}
-# Define location of SA folder (not necessary, but good practice)
-sa.folder <- '/Users/mlammens/Dropbox/Scripts-Programs/SA-Code/'
-# 'source' the setup file
-source( paste( sa.folder, 'sensitivity.setup.r', sep="" ))
-# Execute setup function
-sensitivity.setup( sa.folder )
-```
-
-## SA Functions
-
-If you successfully carried out the above steps, then you now 
-have several functions in your work space.  While a simple sensitivity
-analysis will utilize one of these functions (`sensitivity`), these functions
+If you successfully carried out the above steps, then you can now use any of
+the `demgsa` functions. While a simple sensitivity
+analysis will require the user to call only one of these functions 
+(`sensitivity`), the other functions
 can also be used on their own to do things like:
 
 * Determine which Metapop version was used for a particular *.mp file
@@ -118,7 +103,7 @@ can also be used on their own to do things like:
 
 ## Metapop File Preparation
 
-To create new *.mp files, the user supplies at least two *.mp files, 
+To run a GSA, the user supplies at least two *.mp files, 
 one of which has all of the lowest estimates for any uncertain parameters 
 and the other which has all of the highest estimates for any uncertain 
 parameters.  Note that this is different than  ‘best case’ and ‘worst case’ 
@@ -129,8 +114,8 @@ other parameters (e.g., survival or fecundity).
 
 ### Special cases for varying Carrying Capacity and Migration (Dispersal) scenarios
 
-More than two *.mp files can be used in the SA implemented in these
-scripts to test uncertainty in changes through time of carrying capacity 
+More than two *.mp files can be used to test uncertainty in changes through 
+time of carrying capacity 
 or dispersal parameters. In RAMAS Metapop, these changes are implemented 
 via change files, or *.?CH files.  For example, in the Snow Plover 
 example included in the example data set, we incorporated changes to 
@@ -147,7 +132,23 @@ Migration (Dispersal) scenarios, which change through time in a
 dynamic spatial model as well, while populations change in size 
 and distance from each other, or shift in space. 
 
-## sens.config.txt file
+
+## Modifying the sens_config.txt file
+
+Once the `demgsa` package is installed on loaded into your R workspace, you are
+ready to run a GSA on your demographic model. The next step is to modify the
+configuration file to match your specific demographic model parameters. A
+template file can be found in the `demgsa` GitHub repository 
+[here](https://github.com/mlammens/demgsa/blob/master/inst/extdata/sens_config.txt).
+Each of the parameters that needs to be set is defined in this sens_config.txt 
+file. The template is parameterized to run the sample model examined in this 
+tutorial, which is a demographic model of the Florida Snowy Plover[^1]. During
+these first steps, we carry out a GSA on a model with no effect of sea-level
+rise.
+
+[^1]: Aiello-Lammens et al. 2011. The impact of sea‐level rise on Snowy Plovers in Florida: integrating geomorphological, habitat, and metapopulation models. Global Change Biology 17(12): 3644-3654
+
+
 
 This is a template file that can be copied and modified to setup
 the configurations of individual sensitivity runs.  Step through this 
