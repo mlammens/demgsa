@@ -112,6 +112,25 @@ associated with a ‘worst case’ scenario (e.g., correlation
 structure among populations), which would include low values of 
 other parameters (e.g., survival or fecundity).
 
+## Modifying the sens_config.txt file
+
+Once the `demgsa` package is installed on loaded into your R workspace, you are
+ready to run a GSA on your demographic model. The next step is to modify the
+configuration file to match your specific demographic model parameters. A
+template file can be found in the `demgsa` GitHub repository 
+[here](https://github.com/mlammens/demgsa/blob/master/inst/extdata/sens_config.txt).
+Each of the parameters that needs to be set is defined in this sens_config.txt 
+file. The template is parameterized to run the sample model examined in this 
+tutorial, which is a demographic model of the Florida Snowy Plover[^1]. During
+these first steps, we carry out a GSA on a model with no effect of sea-level
+rise.
+
+[^1]: Aiello-Lammens et al. 2011. The impact of sea‐level rise on Snowy Plovers in Florida: integrating geomorphological, habitat, and metapopulation models. Global Change Biology 17(12): 3644-3654
+
+This is a template file that can be copied and modified to setup
+the configurations of individual sensitivity runs.  Step through this 
+file and read all of the material in it.  
+
 ### Special cases for varying Carrying Capacity and Migration (Dispersal) scenarios
 
 More than two *.mp files can be used to test uncertainty in changes through 
@@ -131,28 +150,6 @@ chosen parameter values.  A similar method is implemented to vary
 Migration (Dispersal) scenarios, which change through time in a 
 dynamic spatial model as well, while populations change in size 
 and distance from each other, or shift in space. 
-
-
-## Modifying the sens_config.txt file
-
-Once the `demgsa` package is installed on loaded into your R workspace, you are
-ready to run a GSA on your demographic model. The next step is to modify the
-configuration file to match your specific demographic model parameters. A
-template file can be found in the `demgsa` GitHub repository 
-[here](https://github.com/mlammens/demgsa/blob/master/inst/extdata/sens_config.txt).
-Each of the parameters that needs to be set is defined in this sens_config.txt 
-file. The template is parameterized to run the sample model examined in this 
-tutorial, which is a demographic model of the Florida Snowy Plover[^1]. During
-these first steps, we carry out a GSA on a model with no effect of sea-level
-rise.
-
-[^1]: Aiello-Lammens et al. 2011. The impact of sea‐level rise on Snowy Plovers in Florida: integrating geomorphological, habitat, and metapopulation models. Global Change Biology 17(12): 3644-3654
-
-
-
-This is a template file that can be copied and modified to setup
-the configurations of individual sensitivity runs.  Step through this 
-file and read all of the material in it.  
 
 ## Simple Snowy Plover Example
 
@@ -178,12 +175,6 @@ are.
 ### Run this example
 
 ```{}
-# Define location of SA folder (not necessary, but good practice)
-sa.folder <- '/Users/mlammens/Dropbox/Scripts-Programs/SA-Code/'
-# 'source' the setup file
-source( paste( sa.folder, 'sensitivity.setup.r', sep="" ))
-# Execute setup function
-sensitivity.setup( sa.folder )
 
 # Run sensitivity analysis
 config.file <- paste(sa.folder,'Examples/sens.config.snpl.simple.txt',sep="")
@@ -209,9 +200,6 @@ the other associated with 2M of SLR
 * To compare 2M and No SLR, set `use.rv.file = TRUE` for the 
 **second** analysis (let's do No SLR first, then 2M)
 
-# Even more complicated cases
-
-Look at code for SNPL 
 
 # Extracting information from *.mp files
 
