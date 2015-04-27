@@ -57,7 +57,6 @@ value
 * Population specific Rmax - All populations varied using **One** random value
 * Population Carrying Capacity
   * KCH files chosen discretely between scenarios using **One** random value
-  * WARNING / TODO: Currently carrying capacity is not varied in any other manner
 
 # Initial set-up
 
@@ -92,12 +91,12 @@ If you successfully carried out the above steps, then you can now use any of
 the `demgsa` functions. While a simple sensitivity
 analysis will require the user to call only one of these functions 
 (`sensitivity`), the other functions
-can also be used on their own to do things like:
+can also be used on their own to:
 
-* Determine which Metapop version was used for a particular *.mp file
+* Determine which Metapop version was used to create a particular *.mp file
 * Read a *.mp file and store it's contents in a list structure
 * Read a *.ptc file
-* Write a new *.mp file, in the even that you adjusted a file you read in
+* Write a new *.mp file, in the event that you adjusted a file you read in
 
 # Running a Sensitivity Analysis
 
@@ -110,7 +109,10 @@ parameters.  Note that this is different than  ‘best case’ and ‘worst case
 scenario *.mp files.  Some high values for parameters may be 
 associated with a ‘worst case’ scenario (e.g., correlation 
 structure among populations), which would include low values of 
-other parameters (e.g., survival or fecundity).
+other parameters (e.g., survival or fecundity). The 
+[demgsa GitHub repository](https://github.com/mlammens/demgsa) contains all of 
+the files need to work through this tutorial, including sample *mp files, in 
+the `inst/extdata` directory. 
 
 ## Modifying the sens_config.txt file
 
@@ -119,25 +121,26 @@ ready to run a GSA on your demographic model. The next step is to modify the
 configuration file to match your specific demographic model parameters. A
 template file can be found in the `demgsa` GitHub repository 
 [here](https://github.com/mlammens/demgsa/blob/master/inst/extdata/sens_config.txt).
-Each of the parameters that needs to be set is defined in this sens_config.txt 
-file. The template is parameterized to run the sample model examined in this 
+Each of the parameters that needs to be set is described in this sens_config.txt 
+file. 
+This is a template file that can be copied and modified to setup
+the configurations of individual sensitivity runs.  Step through this 
+file and read all of the material in it.  
+The template is parameterized to run the sample model examined in this 
 tutorial, which is a demographic model of the Florida Snowy Plover[^1]. During
 these first steps, we carry out a GSA on a model with no effect of sea-level
 rise.
 
 [^1]: Aiello-Lammens et al. 2011. The impact of sea‐level rise on Snowy Plovers in Florida: integrating geomorphological, habitat, and metapopulation models. Global Change Biology 17(12): 3644-3654
 
-This is a template file that can be copied and modified to setup
-the configurations of individual sensitivity runs.  Step through this 
-file and read all of the material in it.  
 
 ### Special cases for varying Carrying Capacity and Migration (Dispersal) scenarios
 
 More than two *.mp files can be used to test uncertainty in changes through 
 time of carrying capacity 
 or dispersal parameters. In RAMAS Metapop, these changes are implemented 
-via change files, or *.?CH files.  For example, in the Snow Plover 
-example included in the example data set, we incorporated changes to 
+via change files, or *.?CH files.  For example, for the Snow Plover 
+example used here, we incorporated changes to 
 population carrying capacity resulting from forecasted sea-level rise, 
 using RAMAS GIS to create a spatially dynamic demographic model in which 
 population carrying capacity decreases over the course of the simulation. 
@@ -146,42 +149,31 @@ files (one per patch). We generated three
 carrying capacity change scenarios (Low, Medium, and High carrying capacities). 
 In carrying out a sensitivity analysis, we choose one of these 
 three scenarios at random to accompany the other randomly 
-chosen parameter values.  A similar method is implemented to vary 
-Migration (Dispersal) scenarios, which change through time in a 
-dynamic spatial model as well, while populations change in size 
+chosen parameter values.  A similar method can be implemented to vary 
+Migration (Dispersal) scenarios, which may change through time in a 
+dynamic spatial model as well, as populations change in size 
 and distance from each other, or shift in space. 
 
-## Simple Snowy Plover Example
+## Step 1. Creation of new demographic models parameterized with random sets of values
 
-Associated Files in `Examples` folder:
+The first step of this GSA is to create new *mp files 
+parameterized with random sets of values,
+which represent the uncertainty and/or stochasticity inherent in each parameter.
+This is done using the `sensitivity` function. The argument to the
+`sensitivity` function is the sens_config txt file. For the no climate change
+(i.e., no slr) scenario, the associated file is sens\_config\_nocc.txt.
 
-* SNPL_HI.mp
-* SNPL_LO.mp
-* sens.config.snpl.simple.txt
+To complete this tutorial on your own system, change into the working directory
+were the files from the `inst/extdata` directory are stored.
 
-What makes this example simple?
+```{r}
+## Set working directory
+setwd( "inst/extdata/" )
 
-* No *.DCH files
-* No *.KCH files
-* Only one species
-
-### Example sens.config file
-
-Look at the `sens.config.snpl.simple.txt` file in
-the `Example` folder. Notice how this file includes full paths. Also 
-notice what the values for `pop.disp.dch.include` and `pop.kch.include` 
-are.
-
-### Run this example
-
-```{}
-
-# Run sensitivity analysis
-config.file <- paste(sa.folder,'Examples/sens.config.snpl.simple.txt',sep="")
-sensitivity(config.file)
+## Call the sensitivity function using the sens_config file for nocc
+sensitivity( "sens_config_nocc.txt" )
 ```
 
-## Slightly more complicated Snowy Plover Example - SLR
 
 This example requires that we account for changes in carrying capacity
 through time (*.KCH - see above).  Here are some key differences between 
