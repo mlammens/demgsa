@@ -4,13 +4,10 @@
 \alias{mp.results}
 \title{Calculates various endpoints using results from RAMAS MP simulation}
 \usage{
-mp.results(mpFile, mpList, spatial = FALSE, ptc = FALSE,
-  ptcFiles = "no file", ptcFileIter = "", habdyn = FALSE,
-  hdhFile = "no file")
+mp.results(mpFile, spatial = FALSE, ptc = FALSE, ptcFiles = "no file",
+  ptcFileIter = "", habdyn = FALSE, hdhFile = "no file")
 }
 \arguments{
-\item{mpFile}{The full path name to the *.mp file to be examined}
-
 \item{spatial}{TRUE/FALSE - should spatial parameters be extracted from the *.mp file,
 including factors such as dispersal, correlation, and factors included in
 *.ptc files, if included}
@@ -30,6 +27,8 @@ ptcFileIter do not match.}
 history file?}
 
 \item{hdhFile}{The full path name to the HabDyn history (.txt) file}
+
+\item{mpList}{The full list object of an MP file that has been run (i.e., has results)}
 }
 \value{
 res.summ.df A data frame of the endpoints calculated

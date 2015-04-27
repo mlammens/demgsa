@@ -5,7 +5,7 @@
 #' simulation as carried out in RAMAS. Use for Metapop version 5 and 5.1
 #' file formats. Based on ResOut.exe program written by R. Akcakaya
 #'
-#' @param mpFile The full path name to the *.mp file to be examined
+#' @param mpList The full list object of an MP file that has been run (i.e., has results)
 #' @param spatial TRUE/FALSE - should spatial parameters be extracted from the *.mp file,
 #' including factors such as dispersal, correlation, and factors included in
 #' *.ptc files, if included
@@ -24,7 +24,7 @@
 #' @return res.summ.df A data frame of the endpoints calculated
 #'
 #'
-mp.results <- function( mpFile, mpList, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
+mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
                         ptcFileIter='', habdyn=FALSE, hdhFile='no file' ) {
 
   ## ************************************************************************** ##
@@ -33,19 +33,17 @@ mp.results <- function( mpFile, mpList, spatial=FALSE, ptc=FALSE, ptcFiles='no f
   # Update: 21 February 2012; 5 March 2012 (added spatial section)
   ## ************************************************************************** ##
   # Inform the user that mp.results has begun
-  #print(paste('Begin mp.results funtion with file: ', mpFile))
+  print(paste('Begin mp.results funtion with file: ', mpFile))
 
-  ### FRAL Specific Change - To analyze these data I need to have already read the mpFile
-
-  # # Check that *.mp file exists
-  # if ( !file.exists( mpFile ) ){
-  #   stop( paste( 'Did not find *.mp file:', mpFile) )
-  # }
+  # Check that *.mp file exists
+  if ( !file.exists( mpFile ) ){
+    stop( paste( 'Did not find *.mp file:', mpFile) )
+  }
 
   # Read *.mp file using mp.read.results.r.  If the file does not contain results
   # it will be reported in the read script.
-  #mp <- mp.read.results( mpFile )
-  mp <- mpList
+  mp <- mp.read.results( mpFile )
+  mp <- mp$mp.file
 
   # Get the *.mp parameter inputs
   mp.in <- mp[1:52]
