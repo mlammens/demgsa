@@ -73,7 +73,7 @@ The easiest way to install this package is to use the
 [devtools](https://github.com/hadley/devtools) package.
 
 
-```{r}
+```{r, eval=FALSE}
 ## Check for devtools. Install if not already installed.
 if( !( "devtools" %in% installed.packages() ) ){
   install.packages( "devtools" ) 
@@ -169,11 +169,22 @@ This is done using the `sensitivity` function. The argument to the
 `sensitivity` function is the sens_config file. For the no climate change
 (i.e., no slr) scenario, the associated file is sens\_config\_nocc.txt.
 
-To complete this tutorial on your own system, change into the working directory
-were the files from the `inst/extdata` directory are stored.
+To complete this tutorial on your own system, you should copy the files stored
+in the `inst/extdata` directory into a new directory, then set this new
+directory as the working directory (using `setwd()`).
+To determine where the `inst/extdata` folder is, you can use the following
+command:
 
 ```{r}
-## Set working directory
+system.file("extdata", package = "demgsa")
+```
+
+Once you've copied these files into a new directory, set that new directory
+as the working directory, and carry on with the tutorial.
+
+```{r, eval=FALSE}
+## Set working directory -- change this line according to where you placed
+## these files!
 setwd( "inst/extdata/" )
 
 ## Call the sensitivity function using the sens_config file for nocc
@@ -237,7 +248,7 @@ results and input parameters used. We do this using the `mp.mult.results`
 function, which is a wrapper for the `mp.results` function. The latter extracts
 results for a single *.mp file.
 
-```{r}
+```{r eval=FALSE}
 ## Get a list of mp files to extract results from
 mp_list <- list.files( pattern = "snpl_nocc.*mp", full.names = TRUE )
 
@@ -245,42 +256,119 @@ mp_list <- list.files( pattern = "snpl_nocc.*mp", full.names = TRUE )
 mp.mult.results( mp.file.list = mp_list, out.csv = "snpl_nocc_results.csv", spatial = TRUE )
 ```
 
-Now we can read in the resulting CSV file and examine the summary data
+Now we can read in the resulting CSV file.
 
-```{r}
+```{r, eval=FALSE}
 ## Read in the resulting CSV file
 snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
+```
+
+```{r, echo=FALSE}
+## Read in the resulting CSV file
+snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
+```
+
+Begin by looking at a brief summary of these data.
+
+```{r}
 summary( snpl_nocc_results )
 ```
 
+Let us look at a simple plot of growth rate versus expected minimum abundance
+
+```{r}
+plot( data = snpl_nocc_results, exp.min.n ~ GrowthRt )
+```
+
+As we would expect, as growth rate increases, so does expected minimum
+abundance.
+
+# Running a second sensitivity analysis on a simulation considering 2m SLR
+
+We will now go through how to carry out paired sensitivity analysis, taking
+advantage of the saved randomizer CSV file. We have created three additional
+*.mp files that are identical to the three used above **except** that these 
+incorporate the effects of changes in rising sea level (2m sea-level rise).
+The overall affect of 2m SLR is to decrease the carrying capacity of each of 
+the sub-populations in the metapopulation over the course of the simulation
+period (i.e., 2010 - 2100).
+
+The most important step in this process is to set `use.rv.file = TRUE` in the
+sens_config file associated with the 2m slr scenario **AND** to set the 
+`rv.file` to the appropriate file (and path if necessary). Once this is 
+done, then running the GSA for the 2m slr scenario is identical to the NoCC 
+scenario.
+
+## Step 1. Create new models
+
+```{r, eval=FALSE}
+## Call the sensitivity function using the sens_config file for 2m slr
+sensitivity( "sens_config_2m.txt" )
+```
+
+## Step 2. Batch run the models
+
+```{}
+/bin/bash snpl_batch_2m0.sh
+```
+
+## Step 3. Extract the results
+
+```{r eval=FALSE}
+## Get a list of mp files to extract results from
+mp_list_2m <- list.files( pattern = "snpl_2m.*mp", full.names = TRUE )
+
+## Call mp.mult.results
+mp.mult.results( mp.file.list = mp_list_2m, out.csv = "snpl_2m_results.csv", spatial = TRUE )
+```
+
+Now we read in the CSV results file for the 2m slr scenario.
+
+```{r, eval=FALSE}
+## Read in the resulting CSV file
+snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
+```
+
+```{r, echo=FALSE}
+## Read in the resulting CSV file
+snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
+```
+
+## Compare NoCC and 2m SLR results
+
+First, let's varify that (at least some of) 
+the non-SLR associate parameters are identical
+
+```{r}
+all( snpl_nocc_results$GrowthRt == snpl_2m_results$GrowthRt )
+all( snpl_nocc_results$stdev.avg == snpl_2m_results$stdev.avg )
+```
+
+Next let's compare the expected minimum abundance values from the two
+sets of models. The red line is the 1:1 line. We see very clearly that 
+EMA is lower for the 2m SLR scenario than it is for the NoCC scenario.
+Because all input parameters, other than the carrying capacity change
+through time (which is due to the 2m SLR) are identical, this decrease is
+directly attributable to the effects of the forecasted impact of rising
+sea levels.
+
+```{r}
+plot( x = snpl_nocc_results$exp.min.n, y = snpl_2m_results$exp.min.n,
+      xlab = "EMA for NoCC scenario", ylab = "EMA for 2m SLR scenario" )
+abline( a = 0, b = 1, col="red" )
+```
 
 
-### How do we adjust the sens.config file?
+# Modifying demgsa functions
 
-* We will need two different sens.config files
-* Add three *.mp files
-* Set `pop.kch.include = TRUE`
-* To compare 2M and No SLR, set `use.rv.file = TRUE` for the 
-**second** analysis (let's do No SLR first, then 2M)
+We encourage you to fork the `demgsa` package on GitHub and modify the 
+functions as needed for your analyses. If you make a general change,
+please feel free to submit it as a Pull Request.
 
+## Why modify?
 
-# Extracting information from *.mp files
-
-The process entails using the following scripts:
-* mp.read.results.r
-* mp.results.r
-* mp.mult.results.r
-
-Go through example of doing this.
-
-## mp.mult.results.r 
-
-Needs a text file of all of the *.mp files you want to extract
-information from.  
-
-# Modifying the SA Scripts
-
-### Why?
+The most likely scripts that you may want to modify are those pertaining 
+to results extraction. Other potential reasons for modificaiton include:
 
 * Account for parameters not currently varied
   * User defined Density Dependence values
@@ -288,21 +376,5 @@ information from.
   * Management actions
 * Incorporate a user defined randomization method (i.e. something other than
 urand or LHS)
-* There are many reasons you may want to vary the code that I can't think of
-
-### Note
-
-The most likely scripts that will need to be modified are those pertaining 
-to results extraction. There are several different versions of the `mp.mult.results.r`
-script floating around the Akcakaya lab right now! 
-(i.e. one for NASA, one for SNPL, etc.)
-
-### Fork (or Copy)
-
-* Always keep a **working** copy of the SA scripts
-* When planning to make changes to the SA code, make a copy of the directory
-in a new location and work on that copy
-* If the change is something to add to the main scripts, merge them later after
-testing
 
 

@@ -32,7 +32,7 @@ out.dir = .
 out.name = snpl_2m
 # The base name for the new *.mp files
 #
-batch.file = snpl_batch
+batch.file = snpl_batch_2m
 # Base name for newly created batch file(s)
 #
 bat.file.cnt = 1
