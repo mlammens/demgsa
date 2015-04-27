@@ -31,7 +31,7 @@ mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE ) {
 
   mp.mult.res <- vector()
   for ( mp in 1:mp.file.cnt ) {
-    mp.res <- mp.results( mp.list[mp], spatial=spatial, mac=mac )
+    mp.res <- mp.results( mp.list[mp], spatial=spatial )
     mp.mult.res <- rbind( mp.mult.res, mp.res )
     ###write.table( mp.res, file=out.csv, append=TRUE, col.names=FALSE,sep=",")
   }
