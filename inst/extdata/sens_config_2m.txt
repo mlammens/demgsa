@@ -1,7 +1,7 @@
 # Sensitivity Analysis Configuration File
 # Purpose: This file contains the input arguments required to run the
 # sensitivity analysis scripts.
-mp.file.names = FLSNPL_2M_LO.mp, FLSNPL_2M_ME.mp, SNPL_2M_HI.mp
+mp.file.names = FLSNPL_2M_LO.mp, FLSNPL_2M_Int.mp, FLSNPL_2M_HI.mp
 # A comma seperated list of *.mp files used in the sensitivity analysis.  The
 # first element of the list should be an *.mp file that contains all of the low
 # estimates of parameter values and the last element of the list should be an
@@ -81,4 +81,8 @@ pop.kch.include = TRUE
 # This is an important option when dealing with population K that may change
 # through time.  If TRUE, then a set of *KCH files associated with one of the
 # mp.files will be selected randomly.
+#
+user.defined.dd = FALSE
+# Include user defined density dependence parameters (stored in the population information data.frame)
+# in parameters that are varied
 

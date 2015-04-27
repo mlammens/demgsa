@@ -1,3 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+
+# Files resulting from tutorial run
+inst/extdata/snpl_out/*
+inst/extdata/snpl_rv.csv

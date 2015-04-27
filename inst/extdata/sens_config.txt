@@ -1,7 +1,7 @@
 # Sensitivity Analysis Configuration File
 # Purpose: This file contains the input arguments required to run the
 # sensitivity analysis scripts.
-mp.file.names = FLSNPL_NoCC_LO.mp, FLSNPL_NoCC_Int.mp, FLSNPL_NoCC_HI.mp
+mp.file.names = FLSNPL_NoCC_LO.mp, FLSNPL_NoCC_ME.mp, SNPL_NoCC_HI.mp
 # A comma seperated list of *.mp files used in the sensitivity analysis.  The
 # first element of the list should be an *.mp file that contains all of the low
 # estimates of parameter values and the last element of the list should be an
