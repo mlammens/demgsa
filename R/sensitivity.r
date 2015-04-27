@@ -778,7 +778,7 @@ sensitivity <- function( sens.config.file ) {
         # the file to Windows format (CRLF)
         if(.Platform$OS.type == "unix") {
           print( 'Converting *.mp file to Windows format' )
-          system( paste(sens.base.dir,'nix2win.sh ',mp.new.file, sep="") )
+          nix2win( mp.new.file )
         }
       }
 
