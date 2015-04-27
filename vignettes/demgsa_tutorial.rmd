@@ -173,7 +173,7 @@ parameterized with random sets of values,
 which represent the uncertainty and/or stochasticity inherent in each parameter.
 This is done using the `sensitivity` function. The argument to the
 `sensitivity` function is the sens_config file. For the no climate change
-(i.e., no slr) scenario, the associated file is sens\_config\_nocc.txt.
+(i.e., no SLR) scenario, the associated file is sens\_config\_nocc.txt.
 
 To complete this tutorial on your own system, you should copy the files stored
 in the `inst/extdata` directory into a new directory, then set this new
@@ -213,14 +213,14 @@ is named `snpl_rv.csv`.
 ## Step 2. Batch run new *.mp files
 
 Two other files that are created by `sensitivity` are a 
-Windows formated batch script (`*.BAT`)
-and a \*nix formated batch script (`*.sh`). 
+Windows formatted batch script (`*.BAT`)
+and a \*nix formatted batch script (`*.sh`). 
 These two files help the user to batch run the 
 new *.mp files.
 
 ### Using the Windows formated batch script
 
-The Windows formated batch script uses a "helper" batch script names 
+The Windows formatted batch script uses a "helper" batch script names 
 `RunMP.BAT`. This file includes the path to the RAMAS GIS Metapopulation 
 module on your system. Open this file, and adjust the path accordingly.
 After this is done, the files can be run by simply double-clicking on the 
@@ -295,9 +295,9 @@ the sub-populations in the metapopulation over the course of the simulation
 period (i.e., 2010 - 2100).
 
 The most important step in this process is to set `use.rv.file = TRUE` in the
-sens_config file associated with the 2m slr scenario **AND** to set the 
+sens_config file associated with the 2m SLR scenario **AND** to set the 
 `rv.file` to the appropriate file (and path if necessary). Once this is 
-done, then running the GSA for the 2m slr scenario is identical to the NoCC 
+done, then running the GSA for the 2m SLR scenario is identical to the NoCC 
 scenario.
 
 ## Step 1. Create new models
@@ -323,7 +323,7 @@ mp_list_2m <- list.files( pattern = "snpl_2m.*mp", full.names = TRUE )
 mp.mult.results( mp.file.list = mp_list_2m, out.csv = "snpl_2m_results.csv", spatial = TRUE )
 ```
 
-Now we read in the CSV results file for the 2m slr scenario.
+Now we read in the CSV results file for the 2m SLR scenario.
 
 ```{r, eval=FALSE}
 ## Read in the resulting CSV file
@@ -332,7 +332,7 @@ snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
 
 ## Compare NoCC and 2m SLR results
 
-First, let's varify that (at least some of) 
+First, let's verify that (at least some of) 
 the non-SLR associate parameters are identical
 
 ```{r}
@@ -364,7 +364,7 @@ please feel free to submit it as a Pull Request.
 ## Why modify?
 
 The most likely scripts that you may want to modify are those pertaining 
-to results extraction. Other potential reasons for modificaiton include:
+to results extraction. Other potential reasons for modification include:
 
 * Account for parameters not currently varied
   * User defined Density Dependence values
