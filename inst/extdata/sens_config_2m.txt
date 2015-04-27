@@ -26,10 +26,10 @@ sens.iter = 10
 # Desired number of iterations of the sensitibity analysis - this program
 # will produce sens.iter number of new *.mp files
 #
-out.dir = snpl_out
+out.dir = .
 # The base directory for where the new *.mp files should go
 #
-out.name = snpl
+out.name = snpl_2m
 # The base name for the new *.mp files
 #
 batch.file = snpl_batch

@@ -5,3 +5,6 @@
 # Files resulting from tutorial run
 inst/extdata/snpl_out/*
 inst/extdata/snpl_rv.csv
+inst/extdata/snpl_*
+inst/extdata/Metapop.exe
+METABAT*

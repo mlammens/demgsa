@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document:
+    toc: yes
+---
+
 Global Sensitivity Analysis of Demographic Models using demgsa
 ========================================================
 Author: Matthew Aiello-Lammens
@@ -160,7 +166,7 @@ The first step of this GSA is to create new *mp files
 parameterized with random sets of values,
 which represent the uncertainty and/or stochasticity inherent in each parameter.
 This is done using the `sensitivity` function. The argument to the
-`sensitivity` function is the sens_config txt file. For the no climate change
+`sensitivity` function is the sens_config file. For the no climate change
 (i.e., no slr) scenario, the associated file is sens\_config\_nocc.txt.
 
 To complete this tutorial on your own system, change into the working directory
@@ -174,15 +180,80 @@ setwd( "inst/extdata/" )
 sensitivity( "sens_config_nocc.txt" )
 ```
 
+A successful run of `sensitivity` should result in 10 new *.mp files
+(the number of replicates set in our example sens\_config file). Note that
+the new *.mp files can be created in any directory the user desires, but if 
+the simulations require any change-through-time files (e.g., KCH or DCH), 
+then those files most be in the same directory as the *.mp files. For this 
+reason, in this example we save the new *.mp files in the `inst/extdata` 
+directory.
 
-This example requires that we account for changes in carrying capacity
-through time (*.KCH - see above).  Here are some key differences between 
-this run and the 'simple' example above:
+In addition to the new *.mp files, if `use.rv.file` was set to `FALSE` in the 
+sens_config file, a CSV file of the randomizer values is created. 
+In this example, the resulting file 
+is named `snpl_rv.csv`. 
 
-* We have two sets of *.mp files, one associated with no sea-level rise (SLR) and
-the other associated with 2M of SLR
-* Here we have **three** \*.mp files, to allow for three KCH scenarios
-*within* each SLR treatment
+## Step 2. Batch run new *.mp files
+
+Two other files that are created by `sensitivity` are a 
+Windows formated batch script (`*.BAT`)
+and a \*nix formated batch script (`*.sh`). 
+These two files help the user to batch run the 
+new *.mp files.
+
+### Using the Windows formated batch script
+
+The Windows formated batch script uses a "helper" batch script names 
+`RunMP.BAT`. This file includes the path to the RAMAS GIS Metapopulation 
+module on your system. Open this file, and adjust the path accordingly.
+After this is done, the files can be run by simply double-clicking on the 
+`*.BAT` file created by `sensitivity`.
+
+### Using the *nix formated batch script
+
+Running RAMAS GIS modules on *nix systems requires
+[wine](https://www.winehq.org/). Once RAMAS is properly running on your
+*nix system, then the best way to run the `sensitivity` created shell script
+is to first create a symbolic link to the Metapopulation module in the directory
+the *.mp and *.sh files are in. This is best done using Terminal, from
+within this directory. Once in that directory, execute the following command,
+substituting in the correct path for your system:
+
+```
+ln -s /Users/mlammens/Dropbox/RAMASGIS/Metapop.exe .
+```
+
+Now the *.sh file can be executed using the following command, replacing
+the *.sh file name as appropriate:
+
+```{}
+/bin/bash snpl_batch_nocc0.sh
+```
+
+## Step 3. Reading and collating model results
+
+After the new *.mp files have been run, we want to extract the simulation
+results and input parameters used. We do this using the `mp.mult.results` 
+function, which is a wrapper for the `mp.results` function. The latter extracts
+results for a single *.mp file.
+
+```{r}
+## Get a list of mp files to extract results from
+mp_list <- list.files( pattern = "snpl_nocc.*mp", full.names = TRUE )
+
+## Call mp.mult.results
+mp.mult.results( mp.file.list = mp_list, out.csv = "snpl_nocc_results.csv", spatial = TRUE )
+```
+
+Now we can read in the resulting CSV file and examine the summary data
+
+```{r}
+## Read in the resulting CSV file
+snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
+summary( snpl_nocc_results )
+```
+
+
 
 ### How do we adjust the sens.config file?
 
