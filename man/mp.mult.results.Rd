@@ -18,4 +18,8 @@ to be extracted}
 \description{
 Call \code{mp.results} for a list of files and export results as a csv file
 }
+\seealso{
+\code{\link{mp.results}} for a full list of descriptions for each
+of the columns in the resulting CSV file.
+}
 

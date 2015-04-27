@@ -31,11 +31,86 @@ history file?}
 \item{mpList}{The full list object of an MP file that has been run (i.e., has results)}
 }
 \value{
-res.summ.df A data frame of the endpoints calculated
+res.summ.df A data frame of the endpoints calculated.
 }
 \description{
 \code{mp.results} Calculates various endpoints from the results of an MP
 simulation as carried out in RAMAS. Use for Metapop version 5 and 5.1
 file formats. Based on ResOut.exe program written by R. Akcakaya
+}
+\details{
+The resulting data.frame includes several parameters and endpoints. Each
+is discribed below.
+\itemize{
+ \item mpFile Name of the MP file the data for a particular row are
+ associated with
+ \item metapop.initab Initial population abundance for metapopulation
+ \item EigenVal Growth rate based on Stage (Age) Matrix (i.e., Eigen value
+ of this matrix)
+ \item GenTime Generation time, as calculated using \code{\link{generation.time}}
+ from the \code{popbio} package
+ \item dd.type Density dependence type
+ \item Rmax Population level maximum growth rate, use if density dependence
+ is contest or scramble type.
+ \item GrowthRt The effective growth rate - either the EigenVal or Rmax,
+ depending on density dependence model
+ \item fec.stdev.avg Average standard deviation of fecundity
+ \item surv.stdev.avg Average standard deviation of survival
+ \item stdev.avg Average standard deviation of fecundity and survival
+ \item fec.cv.avg Average coefficient of variation for fecundity
+ \item surv.cv.avg Average coefficient of variation for survival
+ \item cv.avg Average coefficient of variation for fecundity and survival
+ \item N.maxVmin.10 Ratio of maximum versus minum population size at time
+ step 10
+ \item N.plusVmin.SD N(+1S.D.)/N(-1S.D.) for average abundance for time
+ step 10
+ \item N.CV.10 CV of N (calculated as (N(+1S.D) - N(-1S.D.)/(2*Navg), from
+ Average Abundance for time step 10)
+ \item St.First.Rep Stage level of first reproduction
+ \item St.First.Rep.Name Name of stage level of first reproduction
+ \item ext.risk Exinction risk = (# reps resulting in extinction) / (total # of reps)
+ \item threshold The quasi-extinction threshold. Value set in Stochasticity
+ section of MP Module.
+ \item prob.thresh.maxt Risk of falling below the Threshold at least once
+ by the final time step.
+ Calculated using information regarding the time of first crossing of the extinction
+ \item med.time.cross Median time to fall below the quasi-extinction threshold
+ \item prob.50 Prob(50): Risk of falling below a population size of 50
+ individuals at least once by the final
+ \item prob.250 Prob(250): Risk of falling below a population size of 250
+ individuals at least once by the final
+ \item prob.1000 Prob(1000): Risk of falling below a population size of 1000
+ individuals at least once by the final
+ \item prob.Thr.50 Prob(50%): Risk of falling below a population size of 50%
+ the intial metapop size at least once
+ \item exp.min.n ExpMinN: Expected minimum total abundance (also known as EMA)
+ \item sderr.ema SdErr.ExpMinN: Standard error of EMA
+ \item n.mean N(maxt): Mean metapopulation abundance at the final time step maxt
+ \item n.stdev SD of N: Standard deviation of metapopulation occupancy at
+ the final time step maxt
+ \item metapop.chng Percent change in total metapopulation size compared to
+ initial metapopulation size
+ \item occ.maxt Mean metapopulation occupance at the final time step maxt
+ \item occ.stdev.maxt Standard deviation of metapopulation occupancy at the
+ final time step maxt
+ \item quant.* Quantiles of Terminal Population Trajectory.  5%, 25%, 50%, 75%, and 95% quantiles
+ \item harv.* Harvest Results: Average total harvest, St.Dev. of total
+ harvest, Minimum of total harvest
+ \item use.disp.dist.func Was dispersal distance function used?
+ \item disp.dist.func.* Values for disperal distance function parameters
+ a, b, c, and Dmax
+ \item mean.t0.disp.rate Mean dispersal rate at time 0
+ \item loquart.t0.disp.rate Lower quartile dispersal rate at time 0
+ \item hiquart.t0.disp.rate Upper quartile dispersal rate at time 0
+ \item *.t0.Ngt0.disp.rate Mean, lower, and upper quartile dispersal rates
+ at time 0, considering only populations with non-zero population size
+ \item *.t0.nearest.disp.rate Mean, lower, and upper quartile dispersal rates
+ to nearest neighboring population
+ \item *.t0.Ngt0.nearest.disp.rate Mean, lower, and upper quartile dispersal rates
+ to nearest neighboring population, considering only populations with non-zero population size
+ \item use.corr.dist.func Use the correlation distance function?
+ \item avg.corr.dist.b Average correlation distance, based on b value of the
+ correlation distance function
+}
 }
 
