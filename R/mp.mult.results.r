@@ -8,9 +8,8 @@
 #' @param out.csv A name of a csv file to write results to
 #' @param spatial (TRUE/FALSE) Do the *.MP files contain spatial information
 #' to be extracted
-#' @param mac (TRUE/FALSE) Is the computer a mac or not (legacy)
 
-mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE, mac=FALSE ) {
+mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE ) {
   # Call mp.results for a list of files and export results as a csv file
   #
   # Author: Matthew Aiello-Lammens
@@ -26,7 +25,8 @@ mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE, mac=FALSE ) {
   #
   ###################################################################################################
 
-  mp.list <- readLines( mp.file.list )
+  # mp.list <- readLines( mp.file.list )
+  mp.list <- mp.file.list
   mp.file.cnt <- length( mp.list )
 
   mp.mult.res <- vector()
