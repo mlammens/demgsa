@@ -1,13 +1,13 @@
 ---
-output:
-  pdf_document:
-    toc: yes
+title: "Global Sensitivity Analysis of Demographic Models Using demgsa"
+author: "Matthew E. Aiello-Lammens"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{demgsa Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
 ---
-
-Global Sensitivity Analysis of Demographic Models using demgsa
-========================================================
-Author: Matthew Aiello-Lammens
-Date: 2015-04-21
 
 # Overview
 
@@ -73,7 +73,7 @@ The easiest way to install this package is to use the
 [devtools](https://github.com/hadley/devtools) package.
 
 
-```{r, eval=FALSE}
+```{r}
 ## Check for devtools. Install if not already installed.
 if( !( "devtools" %in% installed.packages() ) ){
   install.packages( "devtools" ) 
@@ -90,6 +90,12 @@ if( !( "demgsa" %in% installed.packages() ) ){
 ## Load demgsa package
 library( demgsa )
 ```
+
+```{r, echo=FALSE}
+data( snpl_nocc_results )
+data( snpl_2m_results )
+```
+
 
 ## demgsa Functions
 
@@ -263,11 +269,6 @@ Now we can read in the resulting CSV file.
 snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
 ```
 
-```{r, echo=FALSE}
-## Read in the resulting CSV file
-snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
-```
-
 Begin by looking at a brief summary of these data.
 
 ```{r}
@@ -325,11 +326,6 @@ mp.mult.results( mp.file.list = mp_list_2m, out.csv = "snpl_2m_results.csv", spa
 Now we read in the CSV results file for the 2m slr scenario.
 
 ```{r, eval=FALSE}
-## Read in the resulting CSV file
-snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
-```
-
-```{r, echo=FALSE}
 ## Read in the resulting CSV file
 snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
 ```
