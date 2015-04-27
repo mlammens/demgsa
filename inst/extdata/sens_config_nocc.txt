@@ -1,10 +1,10 @@
 # Sensitivity Analysis Configuration File
 # Purpose: This file contains the input arguments required to run the
 # sensitivity analysis scripts.
-mp.file.names = SNPL_LO.mp, SNPL_HI.mp
+mp.file.names = FLSNPL_NoCC_LO.mp, FLSNPL_NoCC_ME.mp, SNPL_NoCC_HI.mp
 # A comma seperated list of *.mp files used in the sensitivity analysis.  The
-# first element of the list MUST be an *.mp file that contains all of the low
-# estimates of parameter values and the last element of the list MUST be an
+# first element of the list should be an *.mp file that contains all of the low
+# estimates of parameter values and the last element of the list should be an
 # *.mp file that conatins all of the high estimates of parameter values.
 #
 surv.fec.corr = 0, 0, 0
@@ -67,7 +67,7 @@ pop.disp.depend = 0
 # dispersal is completely dependent (i.e., a single random value will be used
 # to vary every element of the dispersal matrix).
 #
-pop.disp.dch.include = TRUE
+pop.disp.dch.include = FALSE
 # Include DCH files when dealing with population dispersal parameters.  This is
 # an important option when dealing with population dispersal that may change
 # through time.  If this option is selected then pop.disp.depend is ignored,
