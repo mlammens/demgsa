@@ -367,10 +367,13 @@ The most likely scripts that you may want to modify are those pertaining
 to results extraction. Other potential reasons for modification include:
 
 * Account for parameters not currently varied
-  * User defined Density Dependence values
-  * Other values in the 'Population Specific' parameters
-  * Management actions
+    * User defined Density Dependence values
+    * Other values in the 'Population Specific' parameters
+    * Management actions
 * Incorporate a user defined randomization method (i.e. something other than
 urand or LHS)
+* Use the package for other PVA programs
+    * To modify the package for use with another PVA program, you will need to write functions for reading input and writing output files for that program, replacing the current functions `mp.read.r` and `mp.write.r`, respectively. Your input function would read a file to fill the `mp.file` data structure defined in `mp.read.r`. If the PVA program you are using does not include certain parameters specified in this structure, your input function could simply set the same default value for both upper and lower bounds (thereby removing this parameter from the sensitivity analysis). If the PVA program you are using includes parameters that are not specified in the data structure of this package, then you would either have to add those parameters to the sensitivity analysis yourself or do not use them in the GSA. To add them, an easy approach would be to copy the code for an existing parameter and modify. (Of course, in either case, the output function would have to write them). 
+    * An alternative approach would be to write separate functions for converting the RAMAS input file (MP) format into the format for your PVA program (and vice versa). In this case, you would have to use default values for any parameter that is not common to both programs (in other words, you would not be able analyze sensitivity to parameters included in your PVA program but not in RAMAS).
 
 
