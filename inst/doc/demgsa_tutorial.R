@@ -15,14 +15,14 @@ if( !( "demgsa" %in% installed.packages() ) ){
 ## Load demgsa package
 library( demgsa )
 
-## ----, echo=FALSE--------------------------------------------------------
+## ---- echo=FALSE---------------------------------------------------------
 data( snpl_nocc_results )
 data( snpl_2m_results )
 
 ## ------------------------------------------------------------------------
 system.file("extdata", package = "demgsa")
 
-## ----, eval=FALSE--------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 #  ## Set working directory -- change this line according to where you placed
 #  ## these files!
 #  setwd( "inst/extdata/" )
@@ -37,7 +37,7 @@ system.file("extdata", package = "demgsa")
 #  ## Call mp.mult.results
 #  mp.mult.results( mp.file.list = mp_list, out.csv = "snpl_nocc_results.csv", spatial = TRUE )
 
-## ----, eval=FALSE--------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 #  ## Read in the resulting CSV file
 #  snpl_nocc_results <- read.csv( "snpl_nocc_results.csv" )
 
@@ -47,7 +47,7 @@ summary( snpl_nocc_results )
 ## ------------------------------------------------------------------------
 plot( data = snpl_nocc_results, exp.min.n ~ GrowthRt )
 
-## ----, eval=FALSE--------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 #  ## Call the sensitivity function using the sens_config file for 2m slr
 #  sensitivity( "sens_config_2m.txt" )
 
@@ -58,7 +58,7 @@ plot( data = snpl_nocc_results, exp.min.n ~ GrowthRt )
 #  ## Call mp.mult.results
 #  mp.mult.results( mp.file.list = mp_list_2m, out.csv = "snpl_2m_results.csv", spatial = TRUE )
 
-## ----, eval=FALSE--------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 #  ## Read in the resulting CSV file
 #  snpl_2m_results <- read.csv( "snpl_2m_results.csv" )
 
