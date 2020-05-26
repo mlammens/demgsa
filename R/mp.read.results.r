@@ -7,6 +7,7 @@
 #' \link{mp.read} that includes the reading of the results section of a *.MP file.
 #'
 #' @param mpFile The name of the *.MP file to be read.
+#' @param verbose Print function progress and checkpoints.
 #'
 #' @return `mp.read` returns a nested list object. The first level includes
 #' two elements, the version of the *.MP file and list names "mp.file". The
@@ -103,7 +104,7 @@
 #'  \item PopData_df: Population level information in data.frame format
 #'}
 
-mp.read.results <- function(mpFile) {
+mp.read.results <- function(mpFile, verbose = FALSE) {
   # Read data from the *.mp file, including the results section.
   # Based on Metapop version 5 and 5.1 formats.
   #
@@ -128,7 +129,9 @@ mp.read.results <- function(mpFile) {
 
   ##### BEGIN MP INPUT PARAMETERS SECTION #####
   # Inform the user that the mp.read() function has been called.
-  print( paste( "Begin mp.read.results function with file: ", mpFile ) )
+  if(verbose){
+    print( paste( "Begin mp.read.results function with file: ", mpFile ) )
+  }
   # Save the file path to mpFile
   mpFilePath <- mpFile
   # Read *.mp files into a long unsorted 'list' structure, 1 element per line in the file.
@@ -248,7 +251,9 @@ mp.read.results <- function(mpFile) {
 
   # ----------------------------------------------------------------------------------------------- #
   # PopList: Population level information
-  print( "mp.read: Reading population information")
+  if(verbose){
+    print( "mp.read: Reading population information")
+  }
   # First determine the number of populations (popNumber).  In version 5.0, population data begins at line 45
   # and the 'Migration' section begins immediately after the last population's data
   # The population level information is stored in two different structures - 1) a List format that
@@ -349,7 +354,9 @@ mp.read.results <- function(mpFile) {
   # ----------------------------------------------------------------------------------------------- #
   # ----------------------------------------------------------------------------------------------- #
   # Dispersal (Migration) Data
-  print( "mp.read: Reading dispersal (migration) information" )
+  if(verbose){
+    print( "mp.read: Reading dispersal (migration) information" )
+  }
   # UseDispDistFunc: True if dispersal rates are based on dispersal distance function; false if
   #   they are specified in the dispersal matrix
   mp.file$UseDispDistFunc <- as.logical( mpFile[MigrationLine + 1] )
@@ -373,7 +380,9 @@ mp.read.results <- function(mpFile) {
   # ----------------------------------------------------------------------------------------------- #
   # ----------------------------------------------------------------------------------------------- #
   # Correlation Data
-  print( "mp.read: Reading correlation information")
+  if(verbose){
+    print( "mp.read: Reading correlation information")
+  }
   # UseCorrDistFunc: True if correlations between populations is based on correlation distance
   #   function; False if they are specified in the correlation matrix
   mp.file$UseCorrDistFunc <- as.logical( mpFile[CorrLine +1] )
@@ -387,7 +396,9 @@ mp.read.results <- function(mpFile) {
     # population, then the number 1 is returned
     mp.file$CorrMatr <- fill.matrix.df( PopData_df, mp.file$CorrDistFunc, 'corr' )
   } else {
-    print("Using Correlation matrix") ### WARNING LINE
+    if(verbose){
+      print("Using Correlation matrix") ### WARNING LINE
+    }
     # Define a new function used to read correlation distance matrices
     # addZeroes: used to read a correlation distance matrix.  This function adds zeroes to each line
     # of the lower triangular corr-dist matrix stored in the *.mp file
@@ -578,8 +589,9 @@ mp.read.results <- function(mpFile) {
   ###################################################################################################
 
   ##### BEGIN MP RESULTS READ SECTION ######
-  print('mp.read.results: Reading simulation results')
-
+  if(verbose){
+    print('mp.read.results: Reading simulation results')
+  }
   # Get number of replications in simulation
   SimRepLine <- unlist( strsplit ( mpFile[ (res.start + 1) ], ' ' ) )
   results$SimRep <- as.numeric( SimRepLine[1] )
