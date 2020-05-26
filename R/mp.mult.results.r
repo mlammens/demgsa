@@ -36,7 +36,6 @@ mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE ) {
   for ( mp in 1:mp.file.cnt ) {
     mp.res <- mp.results( mp.list[mp], spatial=spatial )
     mp.mult.res <- rbind( mp.mult.res, mp.res )
-    ###write.table( mp.res, file=out.csv, append=TRUE, col.names=FALSE,sep=",")
   }
   ## Rename first column
   names( mp.mult.res )[1] <- "mpFile"

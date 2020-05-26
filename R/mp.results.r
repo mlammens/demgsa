@@ -124,7 +124,7 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
   # Get the *.mp results
   mp.res <- mp$results
 
-  # Created Results Summary (res.summ) list and initiate with length = 0
+  # Create Results Summary (res.summ) list and initiate with length = 0
   res.summ <- vector("list", length=0)
 
   ##### BEGIN REPORT OF INPUT VALUES (Indpendent Variables) #####
