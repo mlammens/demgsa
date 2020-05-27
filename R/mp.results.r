@@ -253,7 +253,23 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
   res.summ$St.First.Rep.Name <- mp.in$StProp[[first.stage]]$StName
 
   ##### BEGIN ENDPOINT CALCULATIONS (Dependent Variables) #####
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
+  # Calculate emperical R (growth rate)
+  #
+  # This calculation follows the following steps:
+  # 1. Calculate R for each time-step using R = N(t+1) / N(t)
+  # 2. Calculate the geometric mean of the vector of Rs
+  #
+  # Using the mean population sizes across all simulations
+  # Note that the mean pops only include those stages include pop sizes
+  #
+  # Get the mean population size
+  mean.pop.size <- mp.res$PopAll$Mean
+  # Calc vector of R values
+  emperical.R.vect <- mean.pop.size[-1]/mean.pop.size[-length(mean.pop.size)]
+  # Calculate geometric mean
+  res.summ$emperical.R <- prod(emperical.R.vect)^(1/length(emperical.R.vect))
+  ## -------------------------------------------------------------------------- ##
   # Extinction Risk: Risk of total extinction by the final time step
   #
   # Get the number of replications that resulted in 'extinction'
