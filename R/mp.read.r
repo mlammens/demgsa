@@ -6,6 +6,7 @@
 #' to configure a metapopulation simulation.
 #'
 #' @param mpFile The name of the *.MP file to be read.
+#' @param verbose Print function progress and checkpoints.
 #'
 #' @return \code{mp.read} returns a nested list object. The first level includes
 #' two elements, the version of the *.MP file and list names "mp.file". The
@@ -103,10 +104,12 @@
 #'}
 
 
-mp.read <- function(mpFile) {
+mp.read <- function(mpFile, verbose = FALSE) {
 
   # Inform the user that the mp.read() function has been called.
-  print( paste( "Begin mp.read function with file: ", mpFile ) )
+  if(verbose){
+    print( paste( "Begin mp.read function with file: ", mpFile ) )
+  }
   # Save the file path to mpFile
   mpFilePath <- mpFile
   # Read *.mp files into a long unsorted 'list' structure, 1 element per line in the file.
@@ -216,7 +219,9 @@ mp.read <- function(mpFile) {
 
   # ----------------------------------------------------------------------------------------------- #
   # PopList: Population level information
-  print( "mp.read: Reading population information")
+  if(verbose){
+    print( "mp.read: Reading population information")
+  }
   # First determine the number of populations (popNumber).  In version 5.0, population data begins at line 45
   # and the 'Migration' section begins immediately after the last population's data
   # The population level information is stored in two different structures - 1) a List format that
@@ -325,7 +330,9 @@ mp.read <- function(mpFile) {
   # ----------------------------------------------------------------------------------------------- #
   # ----------------------------------------------------------------------------------------------- #
   # Dispersal (Migration) Data
-  print( "mp.read: Reading dispersal (migration) information" )
+  if(verbose){
+    print( "mp.read: Reading dispersal (migration) information" )
+  }
   # UseDispDistFunc: True if dispersal rates are based on dispersal distance function; false if
   #   they are specified in the dispersal matrix
   mp.file$UseDispDistFunc <- as.logical( mpFile[MigrationLine + 1] )
@@ -349,7 +356,9 @@ mp.read <- function(mpFile) {
   # ----------------------------------------------------------------------------------------------- #
   # ----------------------------------------------------------------------------------------------- #
   # Correlation Data
-  print( "mp.read: Reading correlation information")
+  if(verbose){
+    print( "mp.read: Reading correlation information")
+  }
   # UseCorrDistFunc: True if correlations between populations is based on correlation distance
   #   function; False if they are specified in the correlation matrix
   mp.file$UseCorrDistFunc <- as.logical( mpFile[CorrLine +1] )
@@ -363,7 +372,9 @@ mp.read <- function(mpFile) {
     # population, then the number 1 is returned
     mp.file$CorrMatr <- fill.matrix.df( PopData_df, mp.file$CorrDistFunc, 'corr' )
   } else {
-    print("Using Correlation matrix") ### WARNING LINE
+    if(verbose){
+      print("Using Correlation matrix") ### WARNING LINE
+    }
     # Define a new function used to read correlation distance matrices
     # addZeroes: used to read a correlation distance matrix.  This function adds zeroes to each line
     # of the lower triangular corr-dist matrix stored in the *.mp file

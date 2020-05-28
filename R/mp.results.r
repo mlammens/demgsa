@@ -20,6 +20,7 @@
 #' @param habdyn TRUE/FALSE - Was HabDyn module used? Is there a corresponding HabDyn
 #' history file?
 #' @param hdhFile The full path name to the HabDyn history (.txt) file
+#' @param verbose Print function progress and checkpoints.
 #'
 #' @return res.summ.df A data frame of the endpoints calculated.
 #'
@@ -99,7 +100,8 @@
 #'}
 #'
 mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
-                        ptcFileIter='', habdyn=FALSE, hdhFile='no file' ) {
+                        ptcFileIter='', habdyn=FALSE, hdhFile='no file',
+                        verbose = FALSE) {
 
   ## ************************************************************************** ##
   # Author: Matthew Aiello-Lammens
@@ -107,7 +109,9 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
   # Update: 21 February 2012; 5 March 2012 (added spatial section)
   ## ************************************************************************** ##
   # Inform the user that mp.results has begun
-  print(paste('Begin mp.results funtion with file: ', mpFile))
+  if(verbose){
+    print(paste('Begin mp.results funtion with file: ', mpFile))
+  }
 
   # Check that *.mp file exists
   if ( !file.exists( mpFile ) ){
@@ -373,7 +377,9 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
   #### Begin section concering Spatial Endpoints ####
   # NOTE: Incorrect indentation for this 'if' statement
   if ( spatial ) {
-    print('mp.results: Begin reading SPATIAL endpoints')
+    if(verbose){
+      print('mp.results: Begin reading SPATIAL endpoints')
+    }
     # ----------------------------------------------------------------------------------------------- #
     # Dispersal Measures from Dispersal Distance Function
     #
@@ -460,7 +466,10 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
   if ( spatial & ptc ) {
 
     # Inform user that endpoints from PTC file are being extracted
-    print( paste('mp.results: Begin extraction of endpoints from *.ptc file: ', ptcFiles))
+    if(verbose){
+      print( paste('mp.results: Begin extraction of endpoints from *.ptc file: ',
+                   ptcFiles))
+    }
 
     ## Check that the ptcFiles exist
     ptcFilesExist <- lapply(ptcFiles, file.exists)

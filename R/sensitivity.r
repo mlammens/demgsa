@@ -8,12 +8,13 @@
 #'
 #' @param sens.config.file A simple text file containing all the necessary
 #' information to run a \code{demgsa} sensitivity analysis.
+#' @param verbose Print function progress and checkpoints.
 #'
 #'@return There are no direct returns to the R environment. However, new
 #'*.MP files are created in a directory determined by values set in the
 #'sens.config.file.
 
-sensitivity <- function( sens.config.file ) {
+sensitivity <- function( sens.config.file, verbose = FALSE ) {
   # RAMAS Metapopulation Sensitivity Analysis Program
   # Author: Matthew Aiello-Lammens
   # Date: 28 January 2011
@@ -330,7 +331,9 @@ sensitivity <- function( sens.config.file ) {
   # If some non-variable parameters do not agree then stop the sensitivity analysis
   nonVariable <- c( 1, 2, 4, 19, 20, 51)
   if ( all( noChange[nonVariable] ) ) {
-    print("Non-Variable parameters agree!")
+    if(verbose){
+      print("Non-Variable parameters agree!")
+    }
   } else {
     print("ERROR: Some Non-Variable parameters do not agree between *.mp files. Non-variable parameters are: ")
     print( guide[nonVariable] )
@@ -401,11 +404,15 @@ sensitivity <- function( sens.config.file ) {
   } else {
     # Begin creation of new *mp files for use in Sensitivity Analysis
     # ***************************************************************
-    print( paste("Begin new *.mp file(s) creation. ", sens.iter, " files will be created.") )
+    if(verbose){
+      print( paste("Begin new *.mp file(s) creation. ", sens.iter, " files will be created.") )
+    }
     # Tell the user which parameters differ between the high and low *.mp files
     parDiffs <- which(noChange == FALSE)
-    print( "Parameters that vary between *.mp files: " )
-    print( guide[parDiffs] )
+    if(verbose){
+      print( "Parameters that vary between *.mp files: " )
+      print( guide[parDiffs] )
+    }
 
     # Determine the total number of random variables that will be needed in this analysis
     #   Initiate a list of 51 zeros
@@ -440,7 +447,9 @@ sensitivity <- function( sens.config.file ) {
     } else if ( sxf.cor == 0 ) {
       stage.vars <- surv.vars + fec.vars
     }
-    print( paste('Count of *independently* varying stage parameters:', stage.vars) )
+    if(verbose){
+      print( paste('Count of *independently* varying stage parameters:', stage.vars) )
+    }
     potential.var.cnt[36] <- stage.vars # The number of rvs for stage matrix
 
     # Assume that since the stage matrix and st.dev. matrix currently share the same correlation structure
@@ -485,15 +494,20 @@ sensitivity <- function( sens.config.file ) {
 
     # Tally up the total number of parameters that are potetnailly being varied
     var.cnt <- sum( potential.var.cnt )
-    print( paste( 'Count of *independently* varying *.mp file parameters (including stage parameters):', var.cnt ))
+    if(verbose){
+      print( paste( 'Count of *independently* varying *.mp file parameters (including stage parameters):',
+                    var.cnt ))
+    }
     ###print('DEBUG OUTPUT: sens.iter and var.cnt'); print(sens.iter); print(var.cnt) ### DEBUG LINE
 
     if ( use.rv.file ) {
       # Import random variables from the rv.file
       uni.rv.mat <- read.csv( rv.file )
       uni.rv.mat <- as.matrix( uni.rv.mat )
-      print('Debug output: uni.rv.mat'); print(uni.rv.mat) ### DEBUG LINE
-      print( dim(uni.rv.mat) )
+      if(verbose){
+        print('Debug output: uni.rv.mat'); print(uni.rv.mat) ### DEBUG LINE
+        print( dim(uni.rv.mat) )
+      }
 
       # Check if imported uni.rv.mat is the correct size
       if ( ! (all ( dim(uni.rv.mat) == c(sens.iter, var.cnt) ) ) ) {
@@ -525,13 +539,17 @@ sensitivity <- function( sens.config.file ) {
     #----------------------------------------------------------------------------------------------#
     # Begin 'for' loop for creation of *.mp files. 'sens.iter' number of loops will be carried out
     for ( iter in 1:sens.iter ) {
-      print('***************************************************************')
-      print( paste( 'Sensitivity iteration:', iter ) )
+      if(verbose){
+        print('***************************************************************')
+        print( paste( 'Sensitivity iteration:', iter ) )
+      }
       # Define a new mp.read list structure with the same values as the mp.low structure
       mp.new <- mp.low
       # Get this iterations uniform random variables. As these variables are used, remove them from uni.rv.
       uni.rv <- uni.rv.mat[iter,]
-      print('Random numbers used to vary *.mp parameters:'); print(uni.rv)
+      if(verbose){
+        print('Random numbers used to vary *.mp parameters:'); print(uni.rv)
+      }
       #----------------------------------------------------------------------------------------------#
       # Stage Matrix (Fecundity and Survival)
       # *************************************
@@ -543,9 +561,13 @@ sensitivity <- function( sens.config.file ) {
         # Call 'rand.st.matr' function to create a new stage matrix
         mp.new$StMatr[[1]]$Matr <- rand.st.matr( surv.fec.corr, StMatLow, StMatHigh, mp.new$ConstraintsMatr, uni.rv[1:stage.vars] )
         uni.rv <- uni.rv[-(1:stage.vars)]
-        print('New Stage Matrix'); print(mp.new$StMatr[[1]]$Matr)
+        if(verbose){
+          print('New Stage Matrix'); print(mp.new$StMatr[[1]]$Matr)
+        }
       } else {
-        print("No differences between stage matrices were observed.  No new stage matrix created.")
+        if(verbose){
+          print("No differences between stage matrices were observed.  No new stage matrix created.")
+        }
       }
       ###print('uni.rv after stg.matrix creation'); print(uni.rv) ### DEBUG LINE
       #----------------------------------------------------------------------------------------------#
@@ -558,11 +580,15 @@ sensitivity <- function( sens.config.file ) {
         }
         # Call 'rand.st.matr' to create new std.dev matrix, using the same inter-dependence structure as fecundity and survival
         mp.new$SDMatr[[1]]$Matr <- rand.st.matr( surv.fec.corr, SDMatrLow, SDMatrHigh, mp.new$ConstraintsMatr, uni.rv[1:stage.vars] )
-        print('New Std. Dev. Matrix'); print(mp.new$SDMatr[[1]]$Matr)
+        if(verbose){
+          print('New Std. Dev. Matrix'); print(mp.new$SDMatr[[1]]$Matr)
+        }
         uni.rv <- uni.rv[-(1:stage.vars)]
         ###print('uni.rv after st.dev matrix creation'); print(uni.rv) ### DEBUG LINE
       } else {
-        print("No differences between standard deviation matrices were observed.  No new std. dev. matrix created.")
+        if(verbose){
+          print("No differences between standard deviation matrices were observed.  No new std. dev. matrix created.")
+        }
       }
       #----------------------------------------------------------------------------------------------#
       # If the number of populations match between the low and high *.mp files, then vary the population
@@ -617,7 +643,9 @@ sensitivity <- function( sens.config.file ) {
           mp.new$PopList <- PopNew_df
         } else {
           # Create a data.frame for the population data for the mp.new file using just the mp.low parameters if no differences were found.
-          print( "No differences in population specific parameters were found.  Using mp.low values for the new *.mp file." )
+          if(verbose){
+            print( "No differences in population specific parameters were found.  Using mp.low values for the new *.mp file." )
+          }
           mp.new$PopList <- mp.low$PopData_df
         }
         #----------------------------------------------------------------------------------------------#
@@ -632,7 +660,9 @@ sensitivity <- function( sens.config.file ) {
             mp.new$UseDispDistFunc <- TRUE
             DispDistFunc_New <- (( mp.high$DispDistFunc - mp.low$DispDistFunc) * uni.rv[1] ) + mp.low$DispDistFunc
             mp.new$DispDistFunc <- DispDistFunc_New
-            print('New dispersal distance function parameters:'); print(mp.new$DispDistFunc)
+            if(verbose){
+              print('New dispersal distance function parameters:'); print(mp.new$DispDistFunc)
+            }
             uni.rv <- uni.rv[-1]
           } else if ( pop.disp.dch.include ) {
             # If we want to vary the dch file scenarios, then complete the following:
@@ -645,7 +675,9 @@ sensitivity <- function( sens.config.file ) {
             disp.matr.rand <- uni.rv[1]
             # Convert to an integer between 1 and the total number of mp files given by user
             disp.matr.num <- ceiling( disp.matr.rand * length(mp.files) )
-            print( paste('Dispersal Matrix From MP File: ', mp.file.names[ disp.matr.num ] ) )
+            if(verbose){
+              print( paste('Dispersal Matrix From MP File: ', mp.file.names[ disp.matr.num ] ) )
+            }
 
             # Set new dispersal matrix as the dispersal matrix of the randomly selected dispersal matrix
             mp.new$DispMatr <- mp.files[[ disp.matr.num ]]$mp.file$DispMatr
@@ -680,7 +712,9 @@ sensitivity <- function( sens.config.file ) {
             stop( "ERROR in parsing dispersal distance measures. Check dispersal related settings in config file." )
           } # End dispersal scenario 'if' conditional
         } else {
-          print("No differences in the 'low' and 'high' dispersal matrices were observed. No new disp. matrix created.")
+          if(verbose){
+            print("No differences in the 'low' and 'high' dispersal matrices were observed. No new disp. matrix created.")
+          }
         } # End Dispersal Matrix 'if' loop
         #----------------------------------------------------------------------------------------------#
         # Correlation Matrix
@@ -693,7 +727,9 @@ sensitivity <- function( sens.config.file ) {
             mp.new$UseCorrDistFunc <- TRUE
             CorrDistFunc_New <- ((mp.high$CorrDistFunc - mp.low$CorrDistFunc) * uni.rv[1]) + mp.low$CorrDistFunc
             mp.new$CorrDistFunc <- CorrDistFunc_New
-            print('New correlation distance function parameters:'); print( mp.new$CorrDistFunc )
+            if(verbose){
+              print('New correlation distance function parameters:'); print( mp.new$CorrDistFunc )
+            }
             uni.rv <- uni.rv[-1]
             ####print('uni.rv after correlation function'); print(uni.rv)
           } else {
@@ -711,7 +747,9 @@ sensitivity <- function( sens.config.file ) {
             } # End matrix.check 'if' loop
           } # End UseCorrDistFunc 'if' loop
         } else {
-          print("No differences in the 'low' and 'high' correlation matrices were observed. No new corr. matrix created.")
+          if(verbose){
+            print("No differences in the 'low' and 'high' correlation matrices were observed. No new corr. matrix created.")
+          }
         } # End Correlation Matrix 'if' loop
         #----------------------------------------------------------------------------------------------#
         # Stage Initial Abundance values
@@ -738,7 +776,9 @@ sensitivity <- function( sens.config.file ) {
           kch.rand <- uni.rv[1]
           # Convert to an integer between 1 and the total number of mp files given by user
           kch.num <- ceiling( kch.rand * length(mp.files) )
-          print( paste('KCH Files From MP File: ', mp.file.names[ kch.num ] ) )
+          if(verbose){
+            print( paste('KCH Files From MP File: ', mp.file.names[ kch.num ] ) )
+          }
           # Set kch files in new *.mp file to those from selected scenario
           mp.new$PopData_df$KchangeSt <- mp.files[[ kch.num ]]$mp.file$PopData_df$KchangeSt
           # Set kch file in PopList information
@@ -762,22 +802,30 @@ sensitivity <- function( sens.config.file ) {
 
       # Check that out.dir exist, create if not
       if ( !file.exists( out.dir ) ) {
-        print( paste('Creating new output directory: ', out.dir, sep="") )
+        if(verbose){
+          print( paste('Creating new output directory: ', out.dir, sep="") )
+        }
         dir.create( out.dir )
       } else {
-        print( paste('Writing new *.mp files to output directory: ', out.dir, sep="") )
+        if(verbose){
+          print( paste('Writing new *.mp files to output directory: ', out.dir, sep="") )
+        }
       }
 
       # Check if new *.mp file exists - if yes, then do not overwrite
       if ( file.exists( mp.new.file ) ) {
         print( paste('WARNING: ',mp.new.file,' already exists! Will not overwrite', sep="") )
       } else {
-        print( paste('Writing new *.mp file: ', mp.new.file, sep="") )
+        if(verbose){
+          print( paste('Writing new *.mp file: ', mp.new.file, sep="") )
+        }
         mp.write( mp.new, mp.lowVersion, mp.new.file )
         # If the file is being created on a *nix system, then convert
         # the file to Windows format (CRLF)
         if(.Platform$OS.type == "unix") {
-          print( 'Converting *.mp file to Windows format' )
+          if(verbose){
+            print( 'Converting *.mp file to Windows format' )
+          }
           nix2win( mp.new.file )
         }
       }
@@ -790,7 +838,9 @@ sensitivity <- function( sens.config.file ) {
       batch.line <- paste( 'CALL RunMP', new.out.name, '/RUN=YES', sep = " " )
       ### FRAL specific line ###
       #batch.line <- paste( 'CALL RunLabMP', new.out.name, '/RUN=YES', sep = " " )
-      print( paste( "Writing a new line to batch file: ", b.file ) )
+      if(verbose){
+        print( paste( "Writing a new line to batch file: ", b.file ) )
+      }
       write( batch.line, file = b.file, append = TRUE )
 
       # Create new shell script file (for running on Linux Boxes)
