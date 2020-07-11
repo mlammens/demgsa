@@ -145,12 +145,35 @@ mp.read <- function(mpFile, verbose = FALSE) {
   mp.file$Stages.IgnoreConstraints <- as.logical(stageLine[2])
 
   # Cat1: Information associated with catastrophe 1
-  #  This information is subdivided in RAMAS Input, but will not be subdivided
-  #  in the first version of the sensitivity analysis package
-  mp.file$Cat1 <- mpFile[11:17]
+  mp.file$Cat1$Name <- mpFile[11]
+  # Check if Cat1 probability is a single number or a PCH file
+  if(grepl(pattern = "PCH", ignore.case = TRUE, x = mpFile[12])){
+    mp.file$Cat1$Probability <- mpFile[12]
+  } else {
+    mp.file$Cat1$Probability <- as.numeric(mpFile[12])
+  }
+  mp.file$Cat1$Extent <- mpFile[13]
+  mp.file$Cat1$Effect <- mpFile[14]
+  mp.file$Cat1$Spread <- mpFile[15]
+  mp.file$Cat1$Infect.Prob <- as.numeric(mpFile[16])
+  mp.file$Cat1$Spread.Dist.Params <- as.numeric(unlist(strsplit( mpFile[17],',' )))
 
   # Cat2: Information associated with catastrophe 2
-  mp.file$Cat2 <- mpFile[18:25]
+  mp.file$Cat2$Name <- mpFile[18]
+  # Check if Cat2 probability is a single number or a PCH file
+  if(grepl(pattern = "PCH", ignore.case = TRUE, x = mpFile[19])){
+    mp.file$Cat2$Probability <- mpFile[19]
+  } else {
+    mp.file$Cat2$Probability <- as.numeric(mpFile[19])
+  }
+  mp.file$Cat2$Extent <- mpFile[20]
+  mp.file$Cat2$Effect <- mpFile[21]
+  mp.file$Cat2$Spread <- mpFile[22]
+  mp.file$Cat2$Infect.Prob <- as.numeric(mpFile[23])
+  mp.file$Cat2$Spread.Dist.Params <- as.numeric(unlist(strsplit( mpFile[24],',' )))
+  # Catastrophe 2 Reset Vital Rate Trend After Catastrophe (True or False),
+  # comma (,), Correlation between the two catastrophes (zero or …)
+  mp.file$Cat2$Reset.and.Correlation <- mpFile[25]
 
   # DDActing: Information regarding density dependence
   mp.file$DDActing <- mpFile[26]
