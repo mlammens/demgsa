@@ -124,7 +124,7 @@ mp.read <- function(mpFile, verbose = FALSE) {
   ConstraintsLine <- which(mpFile == "Constraints Matrix")
 
   # Get Metapop Version information using metapopversion() function
-  metaVer <- metapopversion(mpFile)
+  mp.file$RAMAS.Version <- metapopversion(mpFile)
 
   # Create mp.file list and initiate with length 0
   mp.file <- vector("list",length = 0)
@@ -581,6 +581,6 @@ mp.read <- function(mpFile, verbose = FALSE) {
   # The last element of the list is the population data data.frame
   mp.file$PopData_df <- PopData_df
 
-  return( list( version = metaVer, mp.file = mp.file) )
+  return( mp.file )
 } # End mp.read function
 
