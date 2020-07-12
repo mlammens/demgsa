@@ -152,6 +152,9 @@ mp.read <- function(mpFile, verbose = FALSE, results = FALSE) {
     mp.file$Cat1$Probability <- mpFile[12]
   } else {
     mp.file$Cat1$Probability <- as.numeric(mpFile[12])
+    # If this value was blank, this might be NA, in which case, convert to 0
+    mp.file$Cat1$Probability <-
+      ifelse(is.na(mp.file$Cat1$Probability), yes = 0, no = mp.file$Cat1$Probability)
   }
   mp.file$Cat1$Extent <- mpFile[13]
   mp.file$Cat1$Effect <- mpFile[14]
@@ -166,6 +169,9 @@ mp.read <- function(mpFile, verbose = FALSE, results = FALSE) {
     mp.file$Cat2$Probability <- mpFile[19]
   } else {
     mp.file$Cat2$Probability <- as.numeric(mpFile[19])
+    # If this value was blank, this might be NA, in which case, convert to 0
+    mp.file$Cat2$Probability <-
+      ifelse(is.na(mp.file$Cat2$Probability), yes = 0, no = mp.file$Cat2$Probability)
   }
   mp.file$Cat2$Extent <- mpFile[20]
   mp.file$Cat2$Effect <- mpFile[21]
