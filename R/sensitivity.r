@@ -18,7 +18,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   # RAMAS Metapopulation Sensitivity Analysis Program
   # Author: Matthew Aiello-Lammens
   # Date: 28 January 2011
-  # Update: 29 August 2011; 3 November 2011, 3 December 2011, 8 December 2011
+  # Update: 29 August 2011; 3 November 2011, 3 December 2011, 8 December 2011, 11 July 2020
   #
   # Args:
   #  sens.config.file: File that contains the configureations for a sensitivity analysis run, based on
@@ -45,16 +45,17 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   # Density dependence will be selected by the user, and it is recommended that
   # the user examine variability for all feasible dens. dep. scenarios (i.e.,
   # perform a sensitivity analysis for both ceiling and contest type dens. dep.)
-  ###################################################################################################
+  ## ************************************************************************** ##
+
   # Defined functions used in script
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # matrix.check( mat1, mat2) - checks that element-for-element, the members of mat1 are less than
   #  those for mat2
   matrix.check <- function( mat1, mat2 ){
     if ( all( mat2 >= mat1 ) ) { return(TRUE) }
     else { return(FALSE) }
   }
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # rand.st.matr( corrMat, low.matr, high.matr, const.matr)
   # Create a new stage (or standard deviation) matrix based on a low and high matrix and the user defined
   # inter-dependence structure (correlation) among and within fecundity and survival parameters
@@ -133,13 +134,15 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
     }
     return( StMatNew )
   }
-  ###################################################################################################
+  ## ************************************************************************** ##
+
+
   # Start main program
   # ******************
   #
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Read values from the sensitivity analysis config file (e.g., sens.config.txt)
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Read config file if it exists
   if( file.exists( sens.config.file ) ) {
     sens.config <- readLines( sens.config.file )
@@ -253,7 +256,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   user.defined.dd <- unlist(strsplit( sens.config.vals[ user.defined.dd.line ], split='=' ))
   user.defined.dd <- as.logical( user.defined.dd[2] )
   #
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Use mp.read.r function to read *.mp files and convert into a sorted 'list' structure.
   # For more information on the sorted mp.read list structure, see the 'mp.read.r' function
   # file.
@@ -270,16 +273,13 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   mp.low <- mp.files[[1]]
   mp.high <- mp.files[[ length(mp.files) ]]
   # Determine Metapop version number for each file and check for match
-  mp.lowVersion <- mp.low$version
-  mp.highVersion <- mp.high$version
+  mp.lowVersion <- mp.low$RAMAS.Version
+  mp.highVersion <- mp.high$RAMAS.Version
   if ( mp.lowVersion != mp.highVersion ) {
     stop("Warning: The Metapop Versions do not match between these two files.")
   }
-  # Assigning sorted list structure of the *.mp files to the variable names mp.low and mp.high
-  mp.low <- mp.low$mp.file
-  mp.high <- mp.high$mp.file
 
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Set Variables that may be used multiple times in program
   pop.num <- length(mp.low$PopList) # Determine the number of populations in the low mp file
   pop.num.high <- length(mp.high$PopList) # Number of populations in high mp file
@@ -289,21 +289,23 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
 
   # Check to see of batch files with batch.file in their name exist already
   if( length( dir( path = out.dir, pattern = batch.file ))) {
-    print( paste(batch.file, ' files may already exists! New lines well be appended to existing files.', sep="") )
+    print( paste(batch.file, ' files may already exists! New lines will be appended to existing files.', sep="") )
   }
 
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Identify difference between mp files
   # ************************************
   # General flow to identify which elements of the mp lists do not match:
-  # - Create a vector of logical vals called 'noChange' - assuming low and high files are completely different
-  #   (all noChange values set to FALSE).
+  # - Create a list of vals called 'noChange' - assuming a value of NULL for differences between low and high files
   # - For each element of the mp lists, check if there is "no change" between the two lists
-  # - Note the absence of changes as a logical value, setting that element in the noChange vector
-  #  as TRUE, otherwise leave the value as FALSE
-  # ----------------------------------------------------------------------------------------------- #
+  # - Note the absence of changes as a logical value, setting that element in the noChange list
+  #  as TRUE, otherwise as FALSE
+  ## -------------------------------------------------------------------------- ##
 
-  noChange <- logical(51) # Note: All values are initiated as FALSE
+  # Create list to monitor changes
+  noChange <- vector("list", length(mp.low))
+  # Give list elements names matching mp object
+  names(noChange) <- names(mp.low)
   # Loop through all of the none 'list' elements of the mp 'list'. The 'list' elements are not
   # checked here because the == operator does not allow for logical testing of nested lists
 
@@ -312,44 +314,62 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   # then parameters relating to populations are ignored (i.e. not checked for differences)
   if ( pop.num == pop.num.high ) {
     # non.list elements in the case that population numbers match
-    non.list <- c(1:27,29:35,37,39:45,47:51)
+    non.list <- c("RAMAS.Version","MaxRep","MaxDur","Demog_Stoch","Stages","Stages.IgnoreConstraints","DDActing","Distrib","AdvancedStochSetting","dispCV","WhenBelow","corrwith","DispersalDependsOnTargetPopK","DDBasis","PopSpecificDD","DDforAllPop","UserDllFileName","TimeStepSize","TimeStepUnits","SexStructure","FemaleStages","MatingSystem","FemalesPerMale","MalesPerFemale","CVerror","FirstTforRisk","UseDispDistFunc","DispDistFunc","DispMatr","UseCorrDistFunc","CorrDistFunc","CorrMatr","StMatrNumber","SDMatrNumber","ConstraintsMatr","StMig","Cat1EffMat","Cat1EffNst","Cat2EffMat","Cat2EffNst","StInit","NPopManage","PopManageProp","ExtinctThr","ExplodeThr","stepsize")
   } else {
     # non.list elements in the case that population numbers DO NOT match
-    non.list <- c(1:27,29:30,32:33,35,37,40:44,47:51)
+    non.list <- c("RAMAS.Version","MaxRep","MaxDur","Demog_Stoch","Stages","Stages.IgnoreConstraints","DDActing","Distrib","AdvancedStochSetting","dispCV","WhenBelow","corrwith","DispersalDependsOnTargetPopK","DDBasis","PopSpecificDD","DDforAllPop","UserDllFileName","TimeStepSize","TimeStepUnits","SexStructure","FemaleStages","MatingSystem","FemalesPerMale","MalesPerFemale","CVerror","FirstTforRisk","UseDispDistFunc","DispDistFunc","UseCorrDistFunc","CorrDistFunc","StMatrNumber","SDMatrNumber","StMig","Cat1EffMat","Cat1EffNst","Cat2EffMat","Cat2EffNst","NPopManage","PopManageProp","ExtinctThr","ExplodeThr","stepsize")
   }
   for (i in non.list ) {
     if ( all(mp.low[[i]] == mp.high[[i]]) ) {
-      noChange[i] <- TRUE
+      noChange[[i]] <- TRUE
     }
   }
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Define a list of parameters that are not permited to vary (i.e., Non-variable Parameters),
   # this list is based on discussions with R. Ackakaya.
   # Version 1.x Non-variable parameters: Number of stages in stage-matrix, Number of replications,
   #  Duration, Time-step size, Time-step units, Initial number of time-steps to exclude from risk calc
   #
   # If some non-variable parameters do not agree then stop the sensitivity analysis
-  nonVariable <- c( 1, 2, 4, 19, 20, 51)
-  if ( all( noChange[nonVariable] ) ) {
+  nonVariable <- c("MaxRep","MaxDur","Stages","TimeStepSize","TimeStepUnits","stepsize")
+
+  if ( all(unlist(noChange[nonVariable])) ) {
     if(verbose){
-      print("Non-Variable parameters agree!")
+      print("Non-Variable parameters agree.")
     }
   } else {
     print("ERROR: Some Non-Variable parameters do not agree between *.mp files. Non-variable parameters are: ")
-    print( guide[nonVariable] )
+    print(nonVariable)
     stop()
   }
-  # ----------------------------------------------------------------------------------------------- #
-  # If number of populations is equal, check the PopList element: Check if ANY differences exist, if not,
-  # then we can mark 'noChange[28]' as true and move on.  If false, we'll return to this later.
+
+  # Constraints Matrix is also a non-variable element.
+  # Check that constraints matrices are identical, and stop if not
+  if(all(mp.low$ConstraintsMatr == mp.high$ConstraintsMatr)){
+    noChange$ConstraintsMatr <- TRUE
+  } else {
+    stop("Constraints Matrices do not match between high and low mp files")
+  }
+  ## -------------------------------------------------------------------------- ##
+  # If number of populations is equal, check the PopList element:
+  # Check if ANY differences exist, if not,
+  # then we can mark 'noChange$PopList' as TRUE and move on.
+  # If false, we mark it as FALSE and return to this later.
   if ( pop.num == pop.num.high ) {
     if ( identical( mp.low$PopData_df, mp.high$PopData_df ) ) {
-      noChange[28] <- TRUE
+      noChange$PopList <- TRUE
+      noChange$PopData_df <- TRUE
+    } else {
+      noChange$PopList <- FALSE
+      noChange$PopData_df <- FALSE
     }
   } else {
     print('WARNING: The number of populations in mp.low and mp.high do not match. Ignoring population differences and using all mp.low population specific parameters.')
+    # In this case, set noChange for pop values to TRUE
+    noChange$PopList <- TRUE
+    noChange$PopData_df <- TRUE
   }
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Check Stage-Matrix Differences. StMatr is element 36 in mp list structure:
   #  - If there are multiple stage matrices, only the first one is used in this analysis.  Like wise
   #  for st.dev. matrices
@@ -369,9 +389,11 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   StMatLow <- mp.low$StMatr[[1]]$Matr
   StMatHigh <- mp.high$StMatr[[1]]$Matr
   if ( all( StMatLow == StMatHigh ) ) {
-    noChange[36] <- TRUE
+    noChange$StMatr <- TRUE
+  } else {
+    noChange$StMatr <- FALSE
   }
-  # ----------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
   # Check Standard Deviation-Matrix Differences.
   # Check if there is more than one stdev matrix
   SDMatLowCnt <- length(mp.low$SDMatr)
@@ -386,20 +408,46 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   SDMatrLow <- mp.low$SDMatr[[1]]$Matr;
   SDMatrHigh <- mp.high$SDMatr[[1]]$Matr;
   if ( all( SDMatrLow == SDMatrHigh ) ) {
-    noChange[38] <- TRUE
+    noChange$SDMatr <- TRUE
+  } else {
+    noChange$SDMatr <- FALSE
   }
-  #-------------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
+  # Check if Stage Initial Abundance values are different
+  if( all(mp.low$StInit == mp.high$StInit)){
+    noChange$StInit <- TRUE
+  } else {
+    noChange$StInit <- FALSE
+  }
+  ## -------------------------------------------------------------------------- ##
   # Check that Stage Specific Properties (e.g., Name, Weight, Exclude, Basis for DD, Breeding Prop.)
   # are that same.  In this current version, no variance is accounted for in these values.
   StPropDiffs <- unlist( mp.low$StProp ) == unlist( mp.high$StProp )
   if ( all(StPropDiffs) ) {
-    noChange[46] <- TRUE
+    noChange$StProp <- TRUE
   } else {
+    noChange$StProp <- FALSE
     print( "Warning: Stage specific properties, such as name, weight, exclude, basis for DD, etc. do not match!" )
   }
-  #-------------------------------------------------------------------------------------------------- #
+  ## -------------------------------------------------------------------------- ##
+  # Check on differences between Catastrophe parameters
+  Cat1Diffs <- unlist(mp.low$Cat1) == unlist(mp.high$Cat1)
+  if(all(Cat1Diffs)) {
+    noChange$Cat1 <- TRUE
+  } else{
+    noChange$Cat1 <- FALSE
+  }
+  Cat2Diffs <- unlist(mp.low$Cat2) == unlist(mp.high$Cat2)
+  if(all(Cat2Diffs)) {
+    noChange$Cat2 <- TRUE
+  } else{
+    noChange$Cat2 <- FALSE
+  }
 
-  if ( all( noChange == TRUE ) ) {
+  ## -------------------------------------------------------------------------- ##
+  ## Begin process of generating new mp input parameter values
+  ## -------------------------------------------------------------------------- ##
+  if( all(unlist(noChange)) ) {
     print("No differences between *.mp files were found (that this program looks for).  No sensitivity analysis will be performed.")
   } else {
     # Begin creation of new *mp files for use in Sensitivity Analysis
@@ -408,18 +456,20 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
       print( paste("Begin new *.mp file(s) creation. ", sens.iter, " files will be created.") )
     }
     # Tell the user which parameters differ between the high and low *.mp files
-    parDiffs <- which(noChange == FALSE)
     if(verbose){
       print( "Parameters that vary between *.mp files: " )
-      print( guide[parDiffs] )
+      print( names(noChange)[unlist(noChange) == FALSE] )
     }
 
     # Determine the total number of random variables that will be needed in this analysis
-    #   Initiate a list of 51 zeros
-    potential.var.cnt <- rep(0,51)
-    #   Now set the ones that are fixed
-    #    Stage Initial Abundance
-    potential.var.cnt[45] <- 1
+    ## -------------------------------------------------------------------------- ##
+    # Initiate a list of zeros the name length as the noChange object
+    potential.var.cnt <- rep(0, length(noChange))
+    potential.var.cnt <- as.list(potential.var.cnt)
+    names(potential.var.cnt) <- names(noChange)
+
+    # Assume 1 for the Stage Initial Abundance values
+    potential.var.cnt$StInit <- 1
 
     # Determine Number Vars for Stage Matrix
     surv.cor <- surv.fec.corr[1]
@@ -450,63 +500,56 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
     if(verbose){
       print( paste('Count of *independently* varying stage parameters:', stage.vars) )
     }
-    potential.var.cnt[36] <- stage.vars # The number of rvs for stage matrix
+    potential.var.cnt$StMatr <- stage.vars # The number of rvs for stage matrix
 
     # Assume that since the stage matrix and st.dev. matrix currently share the same correlation structure
     # that we can use the stage.vars as the st.dev.vars
     st.dev.vars <- stage.vars
-    potential.var.cnt[38] <- st.dev.vars # Number of rvs for st.dev. matrix
+    potential.var.cnt$SDMatr <- st.dev.vars # Number of rvs for st.dev. matrix
 
     # Calculate the number of additional variables if population numbers match
     if ( pop.num == pop.num.high ) {
-      potential.var.cnt[34] <- 1 # If the correlation matrix is used, only one rv is used
-      potential.var.cnt[33] <- 1 # If correlation-distance function is used
+      potential.var.cnt$CorrMatr <- 1 # If the correlation matrix is used, only one rv is used
+      potential.var.cnt$CorrDistFunc <- 1 # If correlation-distance function is used
 
       # Dispersal
       #
       # If using DCH files, then vars = 1, otherwise check pop.disp.depend
       if ( pop.disp.dch.include ) {
-        potential.var.cnt[31] <- 1
+        potential.var.cnt$DispMatr <- 1
       } else {
         if ( pop.disp.depend == 1) {
-          potential.var.cnt[31] <- 1 # Dispersal varied using on rv value
+          potential.var.cnt$DispMatr <- 1 # Dispersal varied using 1 rv value
         } else if ( pop.disp.depend == 0 ) {
-          potential.var.cnt[31] <- pop.num*pop.num # Dispersal varied using unique rv value for each element of disp matrix
+          potential.var.cnt$DispMatr <- pop.num*pop.num # Dispersal varied using unique rv value for each element of disp matrix
         } else {
           stop( 'Inappropriate value for pop.disp.depend used.  Value must be 0 or 1.')
         } # End 'if pop.disp.depend' conditional
       } # End 'if pop.disp.dch.includ' conditional
 
-      # Stage initial abundance values
-      # If the user selects use.sad, then there are no rvs added, otherwise one is added
-      if( !use.sad ) {
-        potential.var.cnt[45] <- 1
-      }
-
-      # Population specific information:
+     # Population specific information:
       # - One for initial abundance
       # - One for MaxR
       # - One for User defined density dependent parameters
-      potential.var.cnt[28] <- 3
+      potential.var.cnt$PopList <- 3
       # Add one additional if pop.kch.include is true
-      if( pop.kch.include ){ potential.var.cnt[28] <- 3 }
+      if( pop.kch.include ){ potential.var.cnt$PopList <- 4 }
     } # End 'if pop.num == pop.num.high' loop
 
     # Tally up the total number of parameters that are potetnailly being varied
-    var.cnt <- sum( potential.var.cnt )
+    var.cnt <- sum(unlist(potential.var.cnt))
     if(verbose){
       print( paste( 'Count of *independently* varying *.mp file parameters (including stage parameters):',
                     var.cnt ))
     }
-    ###print('DEBUG OUTPUT: sens.iter and var.cnt'); print(sens.iter); print(var.cnt) ### DEBUG LINE
+
 
     if ( use.rv.file ) {
       # Import random variables from the rv.file
       uni.rv.mat <- read.csv( rv.file )
       uni.rv.mat <- as.matrix( uni.rv.mat )
       if(verbose){
-        print('Debug output: uni.rv.mat'); print(uni.rv.mat) ### DEBUG LINE
-        print( dim(uni.rv.mat) )
+        print('Using rv file: '); print(rv.file)
       }
 
       # Check if imported uni.rv.mat is the correct size
@@ -536,7 +579,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
       write.csv( uni.rv.mat, file=rv.file, row.names=FALSE )
     } # End 'if use.rv.file'
 
-    #----------------------------------------------------------------------------------------------#
+    ## -------------------------------------------------------------------------- ##
     # Begin 'for' loop for creation of *.mp files. 'sens.iter' number of loops will be carried out
     for ( iter in 1:sens.iter ) {
       if(verbose){
@@ -550,10 +593,10 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
       if(verbose){
         print('Random numbers used to vary *.mp parameters:'); print(uni.rv)
       }
-      #----------------------------------------------------------------------------------------------#
+      ## -------------------------------------------------------------------------- ##
       # Stage Matrix (Fecundity and Survival)
       # *************************************
-      if ( noChange[36] == FALSE ) {
+      if ( noChange$StMatr == FALSE ) {
         # Generate a new stage matrix
         if ( !matrix.check( StMatLow, StMatHigh ) ){
           print("WARNING: Elements of the stage matrix in the 'Low' file are greater than those in the 'High' file.")
@@ -570,10 +613,10 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
         }
       }
       ###print('uni.rv after stg.matrix creation'); print(uni.rv) ### DEBUG LINE
-      #----------------------------------------------------------------------------------------------#
+      ## -------------------------------------------------------------------------- ##
       # Standard Deviation Matrix (Fecundity and Survival)
       # **************************************************
-      if ( noChange[38] == FALSE ) {
+      if ( noChange$SDMatr == FALSE ) {
         # Generate a new standard deviation matrix
         if ( !matrix.check( SDMatrLow, SDMatrHigh ) ){
           print("WARNING: Elements of the standard deviation matrix in the 'Low' file are greater than those in the 'High' file.")
@@ -590,15 +633,15 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
           print("No differences between standard deviation matrices were observed.  No new std. dev. matrix created.")
         }
       }
-      #----------------------------------------------------------------------------------------------#
-      # If the number of populations match between the low and high *.mp files, then vary the population
-      # specific values, including the dispersal matrix, correlation matrix, pop specific information,
-      # and stage intial abundance values.
+      ## -------------------------------------------------------------------------- ##
+      # If the number of populations match between the low and high *.mp files,
+      # then vary the population specific values, including the dispersal matrix,
+      # correlation matrix, pop specific information, and stage intial abundance values.
       if ( pop.num == pop.num.high ) {
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
         # Population Specific Information
         # *******************************
-        if ( noChange[28] == FALSE ) {
+        if ( noChange$PopList == FALSE ) {
           # Copy two data.frame(s) of all population specific information to new variables
           PopLow_df <- mp.low$PopData_df
           PopHigh_df <- mp.high$PopData_df
@@ -631,27 +674,24 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
             udd_pars_new <- ((PopHigh_df[udd_pars]-PopLow_df[udd_pars])*uni.rv[1]) + PopLow_df[udd_pars]
             PopNew_df[udd_pars] <- udd_pars_new
             uni.rv <- uni.rv[-1]
-          } else {
-            ### FRAL specific addition ###
-            # Remove the random variable generated to change UDD pars
-            uni.rv <- uni.rv[-1]
           }
 
           # Set mp.new$PopList to PopNew_df
-          # Note: this changes the structure of this list element, from a nested list of lists to a
-          #  data frame object
+          # Note: this changes the structure of this list element,
+          # from a nested list of lists to a data frame object
           mp.new$PopList <- PopNew_df
         } else {
-          # Create a data.frame for the population data for the mp.new file using just the mp.low parameters if no differences were found.
+          # Create a data.frame for the population data for the mp.new file
+          # using just the mp.low parameters if no differences were found.
           if(verbose){
             print( "No differences in population specific parameters were found.  Using mp.low values for the new *.mp file." )
           }
           mp.new$PopList <- mp.low$PopData_df
         }
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
         # Dispersal Matrix
         # ****************
-        if ( noChange[31] == FALSE | noChange[30] == FALSE ) {
+        if ( noChange$DispMatr == FALSE | noChange$DispDistFunc == FALSE ) {
           # First check to see if the mp files agree on UseDispDistFucn, if they do agree
           # and there is no inclusion of dch files, then only change the dispersal distance
           # function parameters. NOTE: if inclusion of the dch files in the sensitivity
@@ -716,10 +756,10 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
             print("No differences in the 'low' and 'high' dispersal matrices were observed. No new disp. matrix created.")
           }
         } # End Dispersal Matrix 'if' loop
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
         # Correlation Matrix
         # ******************
-        if ( noChange[34] == FALSE | noChange[33] == FALSE) {
+        if ( noChange$CorrMatr == FALSE | noChange$CorrDistFunc == FALSE) {
           # Check to see if either file uses a user-defined correlation matrix.  If not,
           # vary the parameters in the user defined matrix.  If so, vary the elements of the
           # matrix using a single uniform random variable.
@@ -751,12 +791,13 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
             print("No differences in the 'low' and 'high' correlation matrices were observed. No new corr. matrix created.")
           }
         } # End Correlation Matrix 'if' loop
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
         # Stage Initial Abundance values
         # ******************************
-        # If the user specified 'use stable age distribution', then change the values of the first column
-        # of the StInit matrix to -1.
-        # If the user specified that these values should vary, then allow these values to vary interdependently
+        # If the user specified 'use stable age distribution', then change the
+        # values of the first column of the StInit matrix to -1.
+        # If the user specified that these values should vary, then allow these
+        # values to vary interdependently
         if ( use.sad ) {
           # Set first column to -1, which tells RAMAS to use the Stable Age Distn
           mp.new$StInit <- mp.low$StInit
@@ -767,7 +808,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
           uni.rv <- uni.rv[-1]
           ####print('uni.rv after stage initial abundance'); print(uni.rv)
         } # End use.sad 'if' loop
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
         # Population Carrying Capacity Through Time
         # *****************************************
         # If pop.kch.include = TRUE, then chose the KCH files from one of the scenarios
@@ -788,12 +829,12 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
         }
 
 
-        #----------------------------------------------------------------------------------------------#
+        ## -------------------------------------------------------------------------- ##
 
 
       } # End 'if (pop.num == pop.num.high)' conditional
 
-      #----------------------------------------------------------------------------------------------#
+      ## -------------------------------------------------------------------------- ##
       # Write the new *.mp file
       # ***********************
       # Create new file name
@@ -836,14 +877,12 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
 
       # Write a line to the Windows Batch script that will run all of the new metapop files
       batch.line <- paste( 'CALL RunMP', new.out.name, '/RUN=YES', sep = " " )
-      ### FRAL specific line ###
-      #batch.line <- paste( 'CALL RunLabMP', new.out.name, '/RUN=YES', sep = " " )
       if(verbose){
         print( paste( "Writing a new line to batch file: ", b.file ) )
       }
       write( batch.line, file = b.file, append = TRUE )
 
-      # Create new shell script file (for running on Linux Boxes)
+      # Create new shell script file (for running on *nix)
       sh.file <- paste( batch.file, bat.file.num, '.sh', sep = "" )
 
       # Write a line to the Shell script that will run the new metapop files
