@@ -527,7 +527,15 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
         } # End 'if pop.disp.depend' conditional
       } # End 'if pop.disp.dch.includ' conditional
 
-     # Population specific information:
+      # Catastrophe information - Full model specific
+      # Currently only allowing for testing sensitivity to probability
+      # at whole model level and matrices
+      potential.var.cnt$Cat1 <- 1
+      potential.var.cnt$Cat2 <- 1
+      potential.var.cnt$Cat1EffMat <- 1
+      potential.var.cnt$Cat2EffMat <- 1
+
+      # Population specific information:
       # - One for initial abundance
       # - One for MaxR
       # - One for User defined density dependent parameters
@@ -543,7 +551,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
                     var.cnt ))
     }
 
-
+    # Check if we should use an existing rv file or write a new one
     if ( use.rv.file ) {
       # Import random variables from the rv.file
       uni.rv.mat <- read.csv( rv.file )
@@ -633,6 +641,32 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
           print("No differences between standard deviation matrices were observed.  No new std. dev. matrix created.")
         }
       }
+      ## -------------------------------------------------------------------------- ##
+      # Catastrophe Effects Matrix
+      # **************************
+      # Catastrophe 1
+      if( noChange$Cat1EffMat == FALSE ){
+        mp.new$Cat1EffMat <- ((mp.high$Cat1EffMat - mp.low$Cat1EffMat)*uni.rv[1]) + mp.low$Cat1EffMat
+        uni.rv <- uni.rv[-1]
+      }
+      # Catastrophe 2
+      if( noChange$Cat2EffMat == FALSE ){
+        mp.new$Cat2EffMat <- ((mp.high$Cat2EffMat - mp.low$Cat2EffMat)*uni.rv[1]) + mp.low$Cat2EffMat
+        uni.rv <- uni.rv[-1]
+      }
+      # Catastrophe Probability
+      # ***********************
+      if( noChange$Cat1 == FALSE ){
+        mp.new$Cat1$Probability <-
+          ((mp.high$Cat1$Probability - mp.low$Cat1$Probability)*uni.rv[1]) +
+          mp.low$Cat1$Probability
+      }
+      if( noChange$Cat2 == FALSE ){
+        mp.new$Cat2$Probability <-
+          ((mp.high$Cat2$Probability - mp.low$Cat2$Probability)*uni.rv[1]) +
+          mp.low$Cat2$Probability
+      }
+
       ## -------------------------------------------------------------------------- ##
       # If the number of populations match between the low and high *.mp files,
       # then vary the population specific values, including the dispersal matrix,
