@@ -120,13 +120,13 @@ mp.results <- function( mpFile, spatial=FALSE, ptc=FALSE, ptcFiles='no file',
 
   # Read *.mp file using mp.read.results.r.  If the file does not contain results
   # it will be reported in the read script.
-  mp <- mp.read.results( mpFile )
-  mp <- mp$mp.file
+  mp <- mp.read(mpFile, verbose = verbose, results = TRUE)
 
-  # Get the *.mp parameter inputs
-  mp.in <- mp[1:52]
   # Get the *.mp results
   mp.res <- mp$results
+  # Get the *.mp parameter inputs
+  mp.in <- mp
+  mp.in$results <- NULL
 
   # Create Results Summary (res.summ) list and initiate with length = 0
   res.summ <- vector("list", length=0)

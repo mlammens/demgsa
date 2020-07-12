@@ -7,6 +7,7 @@
 #'
 #' @param mpFile The name of the *.MP file to be read.
 #' @param verbose Print function progress and checkpoints.
+#' @param results Read results saved in the *.MP file.
 #'
 #' @return \code{mp.read} returns a nested list object. The first level includes
 #' two elements, the version of the *.MP file and list names "mp.file". The
@@ -104,7 +105,7 @@
 #'}
 
 
-mp.read <- function(mpFile, verbose = FALSE) {
+mp.read <- function(mpFile, verbose = FALSE, results = FALSE) {
 
   # Inform the user that the mp.read() function has been called.
   if(verbose){
@@ -123,11 +124,11 @@ mp.read <- function(mpFile, verbose = FALSE) {
   CorrLine <- which(mpFile == "Correlation")
   ConstraintsLine <- which(mpFile == "Constraints Matrix")
 
-  # Get Metapop Version information using metapopversion() function
-  mp.file$RAMAS.Version <- metapopversion(mpFile)
-
   # Create mp.file list and initiate with length 0
   mp.file <- vector("list",length = 0)
+
+  # Get Metapop Version information using metapopversion() function
+  mp.file$RAMAS.Version <- metapopversion(mpFile)
 
   # MaxRep: Number of replications (integer; 1-100000)
   mp.file$MaxRep <- as.numeric(mpFile[7])
@@ -260,7 +261,7 @@ mp.read <- function(mpFile, verbose = FALSE) {
   PopData <- vector('list',length=0) # Initiate a PopData list
   AllPopData <- vector('list',length=0) # Initiate a AllPopData list
   PopData_df_rownames <- vector() # Initiate a row names vector
-  if ( metaVer == 50 ) {
+  if ( mp.file$RAMAS.Version == 50 ) {
     PopData_df_rownames <- c("name","X_coord","Y_coord","InitAbund","DensDep","MaxR","K","Ksdstr","Allee","KchangeSt","DD_Migr","Cat1.Multiplier","Cat1.Prob","IncludeInSum","StageMatType","RelFec","RelSur","localthr","Cat2.Multiplier","Cat2.Prob","SDMatType","TargetPopK","Cat1.TimeSinceLast","Cat2.TimeSinceLast","RelDisp")
     for ( pop in 1:PopNumber ) {
       popLine <- unlist(strsplit( PopRawData[ pop ], ',' ))
@@ -291,7 +292,7 @@ mp.read <- function(mpFile, verbose = FALSE) {
       PopData$RelDisp <- popLine[25]
       AllPopData[[pop]] <- PopData # Add PopData to full list of population data
     }
-  } else if ( metaVer >= 51 ) {
+  } else if ( mp.file$RAMAS.Version >= 51 ) {
     PopData_df_rownames <- c("name","X_coord","Y_coord","InitAbund","DensDep","MaxR","K","Ksdstr","Allee","KchangeSt","DD_Migr","Cat1.Multiplier","Cat1.Prob","IncludeInSum","StageMatType","RelFec","RelSur","localthr","Cat2.Multiplier","Cat2.Prob","SDMatType","TargetPopK","Cat1.TimeSinceLast","Cat2.TimeSinceLast","RelDisp","RelVarFec","RelVarSurv")
     for ( pop in 1:PopNumber ) {
       popLine <- unlist(strsplit( PopRawData[ pop ], ',' ))
@@ -581,6 +582,177 @@ mp.read <- function(mpFile, verbose = FALSE) {
   # The last element of the list is the population data data.frame
   mp.file$PopData_df <- PopData_df
 
-  return( mp.file )
+  ## ******************************************************************** ##
+  ## BEGIN MP RESULTS READ SECTION
+  ## ******************************************************************** ##
+  if(results){
+    # Create results list and initiate with length 0
+    results <- vector("list",length = 0)
+
+    # Find begining of simulation results
+    res.start <- grep('Simulation results', mpFile, ignore.case=TRUE)
+    # Check to see that there are results in this *.mp file
+    if( !length(res.start) ) {
+      stop( paste('No Simulation results found in *.mp file:', mpFilePath) )
+    }
+
+    if(verbose){
+      print('mp.read.results: Reading simulation results')
+    }
+    # Get number of replications in simulation
+    SimRepLine <- unlist( strsplit ( mpFile[ (res.start + 1) ], ' ' ) )
+    results$SimRep <- as.numeric( SimRepLine[1] )
+
+    # Read in Pop. ALL Results
+    pop.all.line <- grep( 'Pop. ALL', mpFile )
+    results$PopAll <- read.table( mpFilePath, skip=pop.all.line, nrows=mp.file$MaxDur )
+    names( results$PopAll ) <- c('Mean', 'StDev', 'Min', 'Max')
+
+    # Read in individual population Results
+    # PopInd variable is a 3-dim Array of size 'Duration of Simulation' x 4 x 'Number of Populations'
+    # The second dimension (length=4) corresponds to the Mean, StDev, Min, and Max population size
+    ###browser()
+    PopInd <- vector()
+
+    # Calculate start of individual population information
+    pop.ind.start <- pop.all.line + mp.file$MaxDur + 1
+    # Calculate end of individual population information
+    pop.ind.stop <- pop.all.line + mp.file$MaxDur + (mp.file$MaxDur+1)*PopNumber
+    # Identify where the population ID lines are (i.e., the lines that say Pop. #)
+    pop.ind.ID.lines <-
+      seq(from=(pop.all.line+mp.file$MaxDur+1),
+          to=(pop.all.line+mp.file$MaxDur+((mp.file$MaxDur+1)*PopNumber)),
+          by=(mp.file$MaxDur+1))
+    # Make a vector of all lines
+    pop.ind.lines <- pop.ind.start:pop.ind.stop
+    # Remove ID lines
+    pop.ind.lines <- setdiff(pop.ind.lines,pop.ind.ID.lines)
+    # Get these values
+    pvals <- mpFile[pop.ind.lines]
+    # Covert to numeric
+    pvals.num <- as.numeric(unlist(strsplit(pvals, split=" ")))
+    # Convert to matrix.  There are allways four columns in these matrices.
+    pop.vals <- matrix(pvals.num,ncol=4,byrow=TRUE)
+    # Make a lits of PopNumber matrices
+    pop.vals.list <- lapply(split(pop.vals,0:(nrow(pop.vals)-1)%/%mp.file$MaxDur),matrix,nrow=mp.file$MaxDur)
+    # Convert the list to an array
+    pop.vals.array <- array(unlist(pop.vals.list),c(mp.file$MaxDur,4,PopNumber))
+    results$PopInd <- pop.vals.array
+    #
+    # for ( pop in 1:PopNumber ){
+    #   # Number of lines past Pop. ALL to skip to start 'pop' values. Last '+1' for Pop. # Label
+    #   start.pop <- pop.all.line + pop*(mp.file$MaxDur +1) + 1
+    #   # Number of lines past Pop. ALL to skip to stop 'pop' values.
+    #   stop.pop <- (start.pop-1) + mp.file$MaxDur
+    #   # Get pop values from mpFile. Initially is read as characters
+    #   pvals <- mpFile[start.pop:stop.pop]
+    #   # Covert to numeric
+    #   pvals.num <- as.numeric(unlist(strsplit(pvals, split=" ")))
+    #   # Convert to matrix.  There are allways four columns in these matrices.
+    #   pop.vals <- matrix(pvals.num,ncol=4,byrow=TRUE)
+    #   # Combine new matrix with PopInd matrix
+    #   PopInd <- c(PopInd,pop.vals)
+    # }
+    # results$PopInd <- array( PopInd, dim=c(mp.file$MaxDur,4,PopNumber) )
+
+    # Read in Occupancy Results - a summary stat. of number of patches occupied at each time step during a simulation
+    occ.line <- grep( '^Occupancy', mpFile ) # Note carrot used to capture line that begins with 'Occupancy'
+    results$Occupancy <- read.table( mpFilePath, skip=occ.line, nrows=mp.file$MaxDur )
+    names( results$Occupancy ) <- c('Mean', 'StDev', 'Min', 'Max')
+
+    # Read in Local Occupancy Results - a summary stat. for occupancy rate (prop. of time patches remained occupied)
+    occ.loc.line <- grep( 'Local Occupancy', mpFile )
+    results$LocOccupancy <- read.table( mpFilePath, skip=occ.loc.line, nrows=PopNumber )
+    names( results$LocOccupancy ) <- c('Mean', 'StDev', 'Min', 'Max')
+
+    # Read Min., Max., and Ter. - the min, max, and final population abundance values for each
+    # replication of the mp model. each column is ordered seperately
+    rep.line <- grep( 'Min.  Max.  Ter.', mpFile )
+    results$Replications <- read.table( mpFilePath, skip=rep.line, nrows=results$SimRep )
+    names( results$Replications ) <- c('Min', 'Max', 'Ter')
+
+    # Read Time to cross - used to determine quasi-extinction/ -explosion risk.  The number of
+    # rows in the mp file depends on the stepsize.  Each row is a time-step and the first col
+    # is the number of times the pop. abund. crossed the min threshold for the first time in that
+    # time step and the second is associated with crossing the max threshold
+    t.cross.line <- grep( 'Time to cross', mpFile )
+    t.cross.rows <- (mp.file$MaxDur %/% mp.file$stepsize) + (mp.file$MaxDur %% mp.file$stepsize)
+    results$TimeCross <- read.table( mpFilePath, skip=t.cross.line, nrows=t.cross.rows )
+    names( results$TimeCross ) <- c('QuasiExtinct','QuasiExpl')
+
+    # Read Final stage abundances results
+    # results$FinalStAb variable is a 3-dim Array of size Numer of Stages (rows) x 4 (col) x Number of Populations (slices)
+    # to call the results of one populaiton (e.g., Pop. 1) use third index (e.g., results$FinalStAb[,,1] )
+    # Columns of the matrix are Mean, StDev, Min, Max
+    fin.stg.ab.line <- grep( 'Final stage abundances', mpFile )
+    fin.stg.ab.rows <- PopNumber * mp.file$Stages
+    FinalStAb <- as.matrix( read.table( mpFilePath, skip=fin.stg.ab.line, nrows=fin.stg.ab.rows ) )
+
+    # Seperate out FinalStAb into the different populations
+    fsa.first <- 1 # Initial first line for partitioning Final Stage Abundance matrix
+
+    fsa.list <- lapply(split(FinalStAb,0:(nrow(FinalStAb)-1)%/%mp.file$Stages),matrix,nrow=mp.file$Stages)
+    fsa.array <- array(unlist(fsa.list),c(mp.file$Stages,4,PopNumber))
+    results$FinalStAb <- fsa.array
+    #
+    # FinalStAb.vect <- vector()
+    # for ( pop in 1:PopNumber ){
+    #   fsa.last <- pop*mp.file$Stages
+    #   FinalStAb.vect <- c( FinalStAb.vect, FinalStAb[ fsa.first:fsa.last, ] )
+    #   fsa.first <- fsa.last + 1
+    # }
+    # results$FinalStAb <- array( FinalStAb.vect, dim=c(mp.file$Stages, 4, PopNumber) )
+
+    # Read LocExtDur results
+    loc.ext.dur.line <- grep( 'LocExtDur', mpFile )
+    results$LocExtDur <- read.table( mpFilePath, skip=loc.ext.dur.line, nrow=PopNumber )
+    names( results$LocExtDur ) <- c('Mean','StDev','Max','Min')
+
+    # Read Harvest results
+    # First line is the total harvest results, the second line is the number of lines dedicated
+    # to individual time units for harvest
+    harvest.line <- grep( '^Harvest', mpFile )
+    results$HarvestTot <- read.table( mpFilePath, skip=harvest.line, nrow=1 )
+    names( results$HarvestTot ) <- c('Mean','StDev','Min','Max')
+    # Determine number of time steps with harvest data
+    harvest.steps <- mpFile[ harvest.line + 2 ]
+    harvest.steps <- unlist( strsplit( harvest.steps, ' ' ) )
+    harvest.steps <- as.numeric( harvest.steps[1] )
+    if ( harvest.steps > 0 ) {
+      results$HarvestSteps <- read.table( mpFilePath, skip=(harvest.line + 2), nrow=harvest.steps )
+      names( results$HarvestSteps ) <- c('Time', 'Mean', 'StDev', 'Min', 'Max')
+    }
+
+    # Read RiskOfLowHarvest results
+    risk.harvest.line <- grep( 'RiskOfLowHarvest', mpFile )
+    results$RiskLowHarvest <- read.table( mpFilePath, skip=risk.harvest.line, nrow=results$SimRep )
+
+    # Read Average stage abundances results
+    # First line after 'avg.st.ab.line' is the number of populations and number of time
+    # steps recorded (dependent on maxdur and stepsize)
+    # After this, there are popnumber * time steps lines by number of stages columns
+    # The values are the stage abundance values for each stage in each population
+    avg.st.ab.line <- grep( 'Average stage abundances', mpFile )
+    ab.steps <- mpFile[ avg.st.ab.line + 1 ]
+    ab.steps <- unlist( strsplit( ab.steps, ' ' ) )
+    ab.pops <- as.numeric( ab.steps[1] )
+    ab.steps <- as.numeric( ab.steps[2] )
+    avg.st.ab.rows <- ab.pops * ab.steps
+    AvgStAb <- as.matrix( read.table( mpFilePath, skip=(avg.st.ab.line + 1), nrow=avg.st.ab.rows ) )
+
+    # Seperate out AvgStAb into different populations
+    asb.first <- 1
+    AvgStAb.vect <- vector()
+    for ( pop in 1:ab.pops ){
+      asb.last <- pop*ab.steps
+      AvgStAb.vect <- c( AvgStAb.vect, AvgStAb[ asb.first:asb.last, ] )
+      asb.first <- asb.last + 1
+    }
+    results$AvgStAb <- array( AvgStAb.vect, dim=c(ab.steps, mp.file$Stages, ab.pops) )
+
+    mp.file$results <- results
+  }
+
+  return(mp.file)
 } # End mp.read function
 

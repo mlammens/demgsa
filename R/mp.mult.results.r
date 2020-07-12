@@ -5,14 +5,13 @@
 #'
 #' @param mp.file.list A list (character vector) of *.MP files to extract
 #' results from
-#' @param out.csv A name of a csv file to write results to
 #' @param spatial (TRUE/FALSE) Do the *.MP files contain spatial information
 #' to be extracted
 #'
 #' @seealso \code{\link{mp.results}} for a full list of descriptions for each
 #' of the columns in the resulting CSV file.
 
-mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE ) {
+mp.mult.results <- function( mp.file.list, spatial=FALSE ) {
   # Call mp.results for a list of files and export results as a csv file
   #
   # Author: Matthew Aiello-Lammens
@@ -37,8 +36,10 @@ mp.mult.results <- function( mp.file.list, out.csv, spatial=FALSE ) {
     mp.res <- mp.results( mp.list[mp], spatial=spatial )
     mp.mult.res <- rbind( mp.mult.res, mp.res )
   }
-  ## Rename first column
+  ## Add a column for the mpFile name
+  mp.mult.res <- cbind(row.names(mp.mult.res), mp.mult.res)
   names( mp.mult.res )[1] <- "mpFile"
-  # Write whole table after all files have been combined.
-  write.csv( mp.mult.res, out.csv )
+  row.names(mp.mult.res) <- NULL
+
+  return(mp.mult.res)
 }
