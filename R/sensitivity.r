@@ -322,6 +322,8 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   for (i in non.list ) {
     if ( all(mp.low[[i]] == mp.high[[i]]) ) {
       noChange[[i]] <- TRUE
+    } else {
+      noChange[[i]] <- FALSE
     }
   }
   ## -------------------------------------------------------------------------- ##
