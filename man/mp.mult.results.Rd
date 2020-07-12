@@ -4,13 +4,11 @@
 \alias{mp.mult.results}
 \title{Extract results for a list of *.MP files}
 \usage{
-mp.mult.results(mp.file.list, out.csv, spatial = FALSE)
+mp.mult.results(mp.file.list, spatial = FALSE)
 }
 \arguments{
 \item{mp.file.list}{A list (character vector) of *.MP files to extract
 results from}
-
-\item{out.csv}{A name of a csv file to write results to}
 
 \item{spatial}{(TRUE/FALSE) Do the *.MP files contain spatial information
 to be extracted}

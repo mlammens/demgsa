@@ -4,12 +4,14 @@
 \alias{mp.read}
 \title{Read RAMAS (c) *.MP file}
 \usage{
-mp.read(mpFile, verbose = FALSE)
+mp.read(mpFile, verbose = FALSE, results = FALSE)
 }
 \arguments{
 \item{mpFile}{The name of the *.MP file to be read.}
 
 \item{verbose}{Print function progress and checkpoints.}
+
+\item{results}{Read results saved in the *.MP file.}
 }
 \value{
 \code{mp.read} returns a nested list object. The first level includes

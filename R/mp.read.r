@@ -179,7 +179,7 @@ mp.read <- function(mpFile, verbose = FALSE, results = FALSE) {
   mp.file$Cat2$Infect.Prob <- as.numeric(mpFile[23])
   mp.file$Cat2$Spread.Dist.Params <- as.numeric(unlist(strsplit( mpFile[24],',' )))
   # Catastrophe 2 Reset Vital Rate Trend After Catastrophe (True or False),
-  # comma (,), Correlation between the two catastrophes (zero or …)
+  # comma (,), Correlation between the two catastrophes (zero or ...)
   mp.file$Cat2$Reset.and.Correlation <- mpFile[25]
 
   # DDActing: Information regarding density dependence
