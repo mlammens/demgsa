@@ -38,9 +38,22 @@ mp.write <- function( mp.new, version, mp.new.file ) {
   write( line.10, file = mp.new.file, append = TRUE )
 
   # Catastrophe-1 information
-  write( mp.new$Cat1, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Name, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Probability, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Extent, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Effect, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Spread, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Infect.Prob, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat1$Spread.Dist.Params, file = mp.new.file, append = TRUE )
   # Catastrophe-2 information
-  write( mp.new$Cat2, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Name, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Probability, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Extent, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Effect, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Spread, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Infect.Prob, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Spread.Dist.Params, file = mp.new.file, append = TRUE )
+  write( mp.new$Cat2$Reset.and.Correlation, file = mp.new.file, append = TRUE )
 
   # Density Dependence Acting
   write( mp.new$DDActing, file = mp.new.file, append = TRUE )
