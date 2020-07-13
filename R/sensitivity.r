@@ -662,11 +662,13 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
         mp.new$Cat1$Probability <-
           ((mp.high$Cat1$Probability - mp.low$Cat1$Probability)*uni.rv[1]) +
           mp.low$Cat1$Probability
+        uni.rv <- uni.rv[-1]
       }
       if( noChange$Cat2 == FALSE ){
         mp.new$Cat2$Probability <-
           ((mp.high$Cat2$Probability - mp.low$Cat2$Probability)*uni.rv[1]) +
           mp.low$Cat2$Probability
+        uni.rv <- uni.rv[-1]
       }
 
       ## -------------------------------------------------------------------------- ##
