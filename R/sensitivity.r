@@ -152,7 +152,7 @@ sensitivity <- function( sens.config.file, verbose = FALSE ) {
   # Check that file is not empty, and if it passes check, make new variable without comment lines
   if( length( sens.config ) > 0 ) {
     # Make new variable without comment lines
-    sens.config.vals <- sens.config[ -(grep("#",sens.config)) ]
+    sens.config.vals <- sens.config[ !grepl("#",sens.config) ]
     # Remove blank spaces
     sens.config.vals <- gsub( " ", "", sens.config.vals)
   } else {
